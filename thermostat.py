@@ -1,7 +1,8 @@
 import subprocess
 import Adafruit_DHT
 import RPi.GPIO as GPIO
-
+import os
+os.environ['PYTHON_EGG_CACHE'] = '__pycache__' 
 class thermostat:
 	Target_Temperature = 65
 	Mode = "OFF"

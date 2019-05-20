@@ -1,14 +1,4 @@
-﻿{% 
-    if Status == "HEAT":
-        set Color=red
-    elif Status == "COOL":
-        set Color=blue
-    else:
-        set Color=black
-    
-%}
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -62,14 +52,38 @@
                 <!-- Third Row-->
                 <div class="row">
                     <div class="col-xs-12">
-                        <button type="button" class="btn btn-default btn-lg" id="COOL" value="COOL">COOL</button>
-                        <button type="button" class="btn btn-default btn-lg" id="OFF" value="OFF">&nbsp;OFF&nbsp;</button>
-                        <button type="button" class="btn btn-default btn-lg" id="HEAT" value="HEAT">HEAT</button>
-                        <button type="button" class="btn btn-success btn-lg active" id="AUTO" value="AUTO">AUTO</button>
+                        <button type="button" id="COOL" value="COOL"\\
+% if Current_Mode=='COOL': 
+    class="btn btn-lg btn-primary active"\\
+% else: 
+    class="btn btn-lg btn-default"\\
+% end
+>COOL</button>
+                        <button type="button" id="OFF" value="OFF"\\
+% if Current_Mode=='OFF': 
+    class="btn btn-lg btn-warning active"\\
+% else: 
+    class="btn btn-lg btn-default" \\
+% end
+>&nbsp;OFF&nbsp;</button>
+                        <button type="button"  id="HEAT" value="HEAT"\\
+% if Current_Mode=='HEAT': 
+    class="btn btn-lg btn-danger active"\\
+% else: 
+    class="btn btn-lg btn-default"\\
+% end
+ >HEAT</button>
+                        <button type="button" id="AUTO" value="AUTO"\\
+% if Current_Mode=='AUTO': 
+    class="btn btn-lg btn-success active"\\
+% else: 
+    class="btn btn-lg btn-default"\\
+% end 
+>AUTO</button>
                     </div>
                 </div>
                 
-                { % if Current_Mode != "OFF" %}
+                % if Current_Mode != "OFF":
                 <!-- Forth Row-->
                 <div class="row">
                     <div class="col-xs-12">
@@ -78,14 +92,17 @@
                             <span class="glyphicon glyphicon-asterisk"  aria-hidden="true"></span>
                             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
                             <select name="targetTemp" id="targetTemp"  onchange="doSubmit()">
-                                {%+ for t in range(60,90) %}
-                                <option { % if Current_Temperature==Temp % }selected{ % endif % }>{{Temp}}</option>
-                                {% endfor %}
+                                % for t in range(60,90):
+                                <option 
+                                % if Current_Temperature==Target_Temperature: 
+                                    'selected'
+                                >{{t}}</option>
+                                % end
                             </select>&deg;F
                         </h1>
                     </div>
                 </div>
-                {% endif %}
+                % end
             </div>
         </div>
     </form>
