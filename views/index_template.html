@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+﻿
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -33,7 +35,7 @@
 <body>
 
     <form method="POST" id="form" action="index.php">
-        <input type='hidden' value='<?=$Current_Mode?>' name='mode' id='mode' />
+        <input type='hidden' value='{{Current_Mode}}' name='mode' id='mode' />
         <div class="jumbotron text-center">
             <div class="container">
                 <!-- First Row-->
@@ -52,57 +54,46 @@
                 <!-- Third Row-->
                 <div class="row">
                     <div class="col-xs-12">
-                        <button type="button" id="COOL" value="COOL"\\
-% if Current_Mode=='COOL': 
-    class="btn btn-lg btn-primary active"\\
-% else: 
-    class="btn btn-lg btn-default"\\
-% end
->COOL</button>
-                        <button type="button" id="OFF" value="OFF"\\
-% if Current_Mode=='OFF': 
-    class="btn btn-lg btn-warning active"\\
-% else: 
-    class="btn btn-lg btn-default" \\
-% end
->&nbsp;OFF&nbsp;</button>
-                        <button type="button"  id="HEAT" value="HEAT"\\
-% if Current_Mode=='HEAT': 
-    class="btn btn-lg btn-danger active"\\
-% else: 
-    class="btn btn-lg btn-default"\\
-% end
- >HEAT</button>
-                        <button type="button" id="AUTO" value="AUTO"\\
-% if Current_Mode=='AUTO': 
-    class="btn btn-lg btn-success active"\\
-% else: 
-    class="btn btn-lg btn-default"\\
-% end 
->AUTO</button>
+                        <button type="button" id="COOL" value="COOL"
+                            {% if Current_Mode=='COOL' -%} class="btn btn-lg btn-primary active"
+                            {% else %} class="btn btn-lg btn-default"
+                            {%- endif %} >COOL</button>
+                        <button type="button" id="OFF" value="OFF"
+                            {% if Current_Mode=='OFF' -%} class="btn btn-lg btn-warning active"
+                            {% else %} class="btn btn-lg btn-default"
+                            {%- endif %} >&nbsp;OFF&nbsp;</button>
+                        <button type="button"  id="HEAT" value="HEAT"
+                            {% if Current_Mode=='HEAT' -%}class="btn btn-lg btn-danger active"
+                            {% else %} class="btn btn-lg btn-default"
+                            {%- endif %}>HEAT</button>
+                        <button type="button" id="AUTO" value="AUTO"
+                            {% if Current_Mode=='AUTO' -%} class="btn btn-lg btn-success active"
+                            {% else %} class="btn btn-lg btn-default"
+                            {%- endif %}>AUTO</button>
                     </div>
                 </div>
                 
-                % if Current_Mode != "OFF":
+                {% if Current_Mode != "OFF" %}
                 <!-- Forth Row-->
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 style="color:{{Color}}"> 
+                        <h1 style="color:{% if Status=='HEAT' %} red {% elif Status=='COOL' %} blue {% else %} black {% endif %}"> 
+                            {% if Status=='HEAT' -%}
                             <span class="glyphicon glyphicon-fire"  aria-hidden="true"></span>
+                            {% elif Status=='COOL' %}
                             <span class="glyphicon glyphicon-asterisk"  aria-hidden="true"></span>
+                            {% else %}
                             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                            {%- endif %}
                             <select name="targetTemp" id="targetTemp"  onchange="doSubmit()">
-                                % for t in range(60,90):
-                                <option 
-                                % if Current_Temperature==Target_Temperature: 
-                                    'selected'
-                                >{{t}}</option>
-                                % end
+                                {% for t in range(60,90) -%}
+                                <option {% if Target_Temperature==t %}selected{% endif %}>{{t}}</option>
+                                {%- endfor %}
                             </select>&deg;F
                         </h1>
                     </div>
                 </div>
-                % end
+                {% endif %}
             </div>
         </div>
     </form>
