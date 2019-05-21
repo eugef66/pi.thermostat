@@ -57,7 +57,7 @@ class thermostat:
 			return "OFF"
 
 	def Set(self, targetTemp, Mode):
-		self.Target_Temperature = targetTemp
+		self.Target_Temperature = int(targetTemp)
 		self.Mode = Mode
 		conf_file = open(self.__ConfigFile,"w+")
 		'''with open("thermostat.conf","w") as conf_file:'''

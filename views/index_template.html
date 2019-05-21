@@ -29,12 +29,24 @@
     <meta name="msapplication-TileColor" content="#ffffff" />
     <meta name="msapplication-TileImage" content="images/ms-icon-144x144.png" />
     <meta name="theme-color" content="#ffffff" />
-
-
+    
+    <script lang="javascript">
+    function doSubmit(mode)
+    {
+        var mode = (mode==null ? document.getElementById('mode').value:mode);
+        var targetTemp = document.getElementById('targetTemp');
+        var temp = (targetTemp==null? document.getElementById('temp').value:targetTemp.value);
+        var url = "/set/" + mode + "/" + temp;
+        //alert (url);
+        location.replace(url);
+    }
+    </script>
+    
 </head>
 <body>
 
     <form method="POST" id="form" action="index.php">
+        <input type='hidden' value='{{Target_Temperature}}' name='temp' id='temp' />
         <input type='hidden' value='{{Current_Mode}}' name='mode' id='mode' />
         <div class="jumbotron text-center">
             <div class="container">
@@ -54,20 +66,20 @@
                 <!-- Third Row-->
                 <div class="row">
                     <div class="col-xs-12">
-                        <button type="button" id="COOL" value="COOL"
-                            {% if Current_Mode=='COOL' -%} class="btn btn-lg btn-primary active"
+                        <button type="button" id="COOL" value="COOL" onClick="doSubmit('COOL')"
+                            {% if Current_Mode=='COOL' -%} class="btn btn-lg btn-primary active" disabled="disabled"
                             {% else %} class="btn btn-lg btn-default"
                             {%- endif %} >COOL</button>
-                        <button type="button" id="OFF" value="OFF"
-                            {% if Current_Mode=='OFF' -%} class="btn btn-lg btn-warning active"
+                        <button type="button" id="OFF" value="OFF" onClick="doSubmit('OFF')"
+                            {% if Current_Mode=='OFF' -%} class="btn btn-lg btn-warning active" disabled="disabled"
                             {% else %} class="btn btn-lg btn-default"
                             {%- endif %} >&nbsp;OFF&nbsp;</button>
-                        <button type="button"  id="HEAT" value="HEAT"
-                            {% if Current_Mode=='HEAT' -%}class="btn btn-lg btn-danger active"
+                        <button type="button"  id="HEAT" value="HEAT" onClick="doSubmit('HEAT')"
+                            {% if Current_Mode=='HEAT' -%}class="btn btn-lg btn-danger active" disabled="disabled"
                             {% else %} class="btn btn-lg btn-default"
                             {%- endif %}>HEAT</button>
-                        <button type="button" id="AUTO" value="AUTO"
-                            {% if Current_Mode=='AUTO' -%} class="btn btn-lg btn-success active"
+                        <button type="button" id="AUTO" value="AUTO" onClick="doSubmit('AUTO')"
+                            {% if Current_Mode=='AUTO' -%} class="btn btn-lg btn-success active" disabled="disabled"
                             {% else %} class="btn btn-lg btn-default"
                             {%- endif %}>AUTO</button>
                     </div>
@@ -85,7 +97,7 @@
                             {% else %}
                             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
                             {%- endif %}
-                            <select name="targetTemp" id="targetTemp"  onchange="doSubmit()">
+                            <select name="targetTemp" id="targetTemp"  onchange="doSubmit(null)">
                                 {% for t in range(60,90) -%}
                                 <option {% if Target_Temperature==t %}selected{% endif %}>{{t}}</option>
                                 {%- endfor %}

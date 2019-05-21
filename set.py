@@ -21,7 +21,7 @@ for a in sys.argv:
 		continue
 #print (targetTemp)
 #print (mode)
-t.Set(int(targetTemp),mode)
+t.Set(targetTemp,mode)
 import get
 
 	
