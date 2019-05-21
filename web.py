@@ -1,5 +1,6 @@
 from bottle import route, run, template, jinja2_template as template, static_file, redirect, request
 import hashlib
+import datetime
 import thermostat as th
 
 def checkLogin():
@@ -15,7 +16,9 @@ def checkLogin():
 def index():
 	if checkLogin()==True:
 		t=th.thermostat()
+		print (datetime.datetime.now().time())
 		ct,ch = t.Current_Temperature_Humidity
+		print (datetime.datetime.now().time())
 		return template('index_template', Status=t.Status, Current_Temperature=ct, Current_Humidity=ch, Color='blue',Target_Temperature=t.Target_Temperature, Current_Mode=t.Mode)
 
 @route('/set/<mode>/<temp>')
@@ -44,8 +47,20 @@ def do_login():
 
 # static files
 @route('/images/<filename>')
-def server_static(filename):
+def images(filename):
 	return static_file(filename, root='./images');
+
+@route('/css/<filename>')
+def css(filename):
+	return static_file(filename, root='./css');
+
+@route('/fonts/<filename>')
+def css(filename):
+	return static_file(filename, root='./fonts');
+
+@route('/js/<filename>')
+def css(filename):
+	return static_file(filename, root='./js');
 
 
 if __name__=='__main__':
