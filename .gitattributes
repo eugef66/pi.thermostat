@@ -1,1 +1,2 @@
 *.php linguist-vendored
+views/* linguist-vendored
