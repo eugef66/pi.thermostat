@@ -9,7 +9,7 @@ class thermostat:
 	__HEAT_Pin = 2
 	__COOL_Pin = 3
 	__Sensor_Pin=4
-	__ConfigFile="/home/pi/Apps/Thermostat/thermostat.conf"
+	__ConfigFile="thermostat.conf"
 
 
 	def __init__(self, **kwargs):
