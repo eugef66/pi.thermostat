@@ -1,9 +1,9 @@
 from bottle import route, run, template, jinja2_template as template, static_file, redirect, request
 import thermostat as th
-from auth import auth
+from auth import auth_session
 
 
-a=auth()
+a=auth_session()
 a.redirect_url="/login"
 
 
@@ -52,6 +52,7 @@ def css(filename):
 def css(filename):
 	return static_file(filename, root='./js');
 
+print(__name__)
 
 if __name__=='__main__':
 	run(host='localhost', port=8888)
