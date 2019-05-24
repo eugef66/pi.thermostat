@@ -4,7 +4,8 @@ from auth import auth_session
 
 
 a=auth_session()
-a.redirect_url="/login"
+root='/Thermostat'
+a.redirect_url="./login"
 
 
 @route('/')
@@ -19,7 +20,7 @@ def set(mode, temp):
 	if a.is_logged_in:
 		t=th.thermostat()
 		t.Set(temp,mode)
-		return redirect('/');
+		return redirect('../../../');
 
 @route('/login')
 def login():
@@ -29,7 +30,7 @@ def login():
 def do_login():
 	pin = request.forms.get('pin')
 	if a.login(pin):
-		redirect ('/')
+		redirect ('./')
 	else: 
 		return template('login_template', Message='Login incorrect')
 
@@ -55,4 +56,4 @@ def css(filename):
 print(__name__)
 
 if __name__=='__main__':
-	run(host='localhost', port=8888)
+	run(host='localhost', port=9998)
