@@ -9,7 +9,7 @@ class auth_session:
 	
 	session_timeout = 20
 	__session_data={}
-	redirect_url="/login"
+	logaout_redirect_url="/login"
 	
 	def __init__(self, **kwarg):
 		self.save_session()
@@ -44,10 +44,9 @@ class auth_session:
 		try:
 			session_date = self.__session_data[sid]
 		except KeyError:
-			redirect(self.redirect_url)
+			redirect(self.logout_redirect_url)
 			return False
 		dt= datetime.strptime(session_date,'%Y-%m-%d %H:%M:%S.%f')
-
 		if dt:
 			date_diff = datetime.now()-dt
 			session_age=(date_diff.days * 1440) + (date_diff.seconds/60) #convert days to minutes + convert seconds to minutes
@@ -61,28 +60,9 @@ class auth_session:
 		sid = request.get_cookie("sid")
 		del self.__session_data[sid]
 		self.save_session()
-		redirect(self.redirect_url)
+		redirect(self.logout_redirect_url)
 		return 
 		
 
 
-
-	def checkLogin(self):
-		# Update to handle miltiple browsers
-		session_timeout = 20
-		valid=False
-		session_age= session_timeout+1
-		try:
-			sf = open (".session","r")
-			session_date=datetime.strptime(sf.read(), '%Y-%m-%d %H:%M:%S.%f')
-			sf.close()
-			if session_date:
-				session_age=((datetime.now()-session_date).seconds/60)
-		except IOError:
-			pass
-		print (session_age)
-		if session_age<session_timeout:
-			return True
-		else:
-			redirect('./login')
 

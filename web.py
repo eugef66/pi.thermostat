@@ -4,7 +4,7 @@ from auth import auth_session
 
 
 a=auth_session()
-a.redirect_url="/login"
+a.logout_redirect_url="/login"
 
 @route('/')
 def index():
@@ -37,19 +37,19 @@ def do_login():
 # static files
 @route('/images/<filename>')
 def images(filename):
-	return static_file(filename, root='./images');
+	return static_file(filename, root='/home/pi/Apps/Thermostat/images');
 
 @route('/css/<filename>')
 def css(filename):
-	return static_file(filename, root='./css');
+	return static_file(filename, root='/home/pi/Apps/Thermostat/css');
 
 @route('/fonts/<filename>')
 def css(filename):
-	return static_file(filename, root='./fonts');
+	return static_file(filename, root='/home/pi/Apps/Thermostat/fonts');
 
 @route('/js/<filename>')
 def css(filename):
-	return static_file(filename, root='./js');
+	return static_file(filename, root='/home/pi/Apps/Thermostat/js');
 
 print(__name__)
 
