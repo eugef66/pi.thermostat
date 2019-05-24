@@ -34,7 +34,7 @@
 {% if Message -%}
 <div class="alert alert-danger" role="alert">{{Message}}</div>
 {%- endif %}
-<form method="POST">
+<form method="POST" action="/login">
 	<div class="jumbotron text-center">	
 		<p>
 		<input type="number" pattern="[0-9]*" name="pin" id="pin" placeholder="PIN" class="form-control input-lg"/>

@@ -4,9 +4,7 @@ from auth import auth_session
 
 
 a=auth_session()
-root='/Thermostat'
-a.redirect_url="./login"
-
+a.redirect_url="/login"
 
 @route('/')
 def index():
@@ -20,7 +18,7 @@ def set(mode, temp):
 	if a.is_logged_in:
 		t=th.thermostat()
 		t.Set(temp,mode)
-		return redirect('../../../');
+		return redirect('/');
 
 @route('/login')
 def login():
@@ -30,7 +28,7 @@ def login():
 def do_login():
 	pin = request.forms.get('pin')
 	if a.login(pin):
-		redirect ('./')
+		redirect ('/')
 	else: 
 		return template('login_template', Message='Login incorrect')
 

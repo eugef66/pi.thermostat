@@ -9,7 +9,7 @@ class auth_session:
 	
 	session_timeout = 20
 	__session_data={}
-	redirect_url="./login"
+	redirect_url="/login"
 	
 	def __init__(self, **kwarg):
 		self.save_session()
@@ -84,5 +84,5 @@ class auth_session:
 		if session_age<session_timeout:
 			return True
 		else:
-			redirect('/login')
+			redirect('./login')
 

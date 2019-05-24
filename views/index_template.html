@@ -33,8 +33,8 @@
         var mode = (mode==null ? document.getElementById('mode').value:mode);
         var targetTemp = document.getElementById('targetTemp');
         var temp = (targetTemp==null? document.getElementById('temp').value:targetTemp.value);
-        var url = "./set/" + mode + "/" + temp;
-        alert (url);
+        var url = "/set/" + mode + "/" + temp;
+        //alert (url);
         location.replace(url);
     }
     </script>
@@ -42,7 +42,7 @@
 </head>
 <body>
 
-    <form method="POST" id="form">
+    <form id="form">
         <input type='hidden' value='{{Target_Temperature}}' name='temp' id='temp' />
         <input type='hidden' value='{{Current_Mode}}' name='mode' id='mode' />
         <div class="jumbotron text-center">
