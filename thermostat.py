@@ -7,8 +7,10 @@ class thermostat:
 	Target_Temperature = 65
 	Mode = "OFF"
 	__HEAT_Pin = 2
+	'''__HEAT2_Pin = 17'''
 	__COOL_Pin = 3
 	__Sensor_Pin=4
+
 	__ConfigFile="thermostat.conf"
 
 
