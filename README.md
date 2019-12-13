@@ -5,7 +5,7 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
 
  - Raspberri PI 3B with power adapter 
  - DHT22 Themperature sensor - https://www.amazon.com/gp/product/B073F472JL
- - DC 5V Relay Module  - https://www.amazon.com/gp/product/B00E0NTPP4
+ - DC 5V Relay Module  - https://www.amazon.com/gp/product/B07YRYBLSZ
  - Breadboard jumper wires (Female-Female) - https://www.amazon.com/gp/product/B07GD2BWPY
 
 2. Software Prerequisite
@@ -15,9 +15,8 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
   - Python 2.7
 
 3. Installation instructions
-
- -------------set pins at boot
-      sudo nano /etc/rc.local
+  1. set default state of pins at boot
+      >>sudo nano /etc/rc.local
       
             gpio -g write 2 1
             gpio -g write 3 1
@@ -29,5 +28,5 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
  
 
 
-........
+
 
