@@ -74,13 +74,12 @@ class thermostat:
 		temp=self.Current_Temperature
 		mode=self.Mode
 		
-		'''
+		
 		if self.Target_Temperature - temp > 3 and (mode == "HEAT" or mode=="AUTO"):
 			# Set HEAT_2=ON, COOL=OFF
 			GPIO.output([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],(GPIO.HIGH, GPIO.LOW, GPIO.HIGH))
 			return "ON"
-		'''
-		if self.Target_Temperature - temp > 1 and (mode == "HEAT" or mode=="AUTO"):
+		elif self.Target_Temperature - temp > 1 and (mode == "HEAT" or mode=="AUTO"):
 			# Set HEAT_1=ON, COOL=OFF
 			GPIO.output([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],(GPIO.LOW, GPIO.HIGH, GPIO.HIGH))
 			return "ON"
