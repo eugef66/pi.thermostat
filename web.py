@@ -11,7 +11,8 @@ def index():
 	if a.is_logged_in:
 		t=th.thermostat()
 		ct,ch = t.Current_Temperature_Humidity
-		return template('index_template', Status=t.Status, Current_Temperature=ct, Current_Humidity=ch, Color='blue',Target_Temperature=t.Target_Temperature, Current_Mode=t.Mode)
+		s,st=t.Status
+		return template('index_template', Status=s, Current_Temperature=ct, Current_Humidity=ch, Color='blue',Target_Temperature=t.Target_Temperature, Current_Mode=t.Mode, Stage=st)
 
 @route('/set/<mode>/<temp>')
 def set(mode, temp):

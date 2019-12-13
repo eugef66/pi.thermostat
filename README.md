@@ -16,6 +16,18 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
 
 3. Installation instructions
 
+ -------------set pins at boot
+      sudo nano /etc/rc.local
+      
+            gpio -g write 2 1
+            gpio -g write 3 1
+            gpio -g write 17 1
+            gpio -g mode 2 OUT
+            gpio -g mode 3 OUT
+            gpio -g mode 17 OUT
+            
+ 
+
 
 ........
 

@@ -7,7 +7,7 @@ class thermostat:
 	Target_Temperature = 65
 	Mode = "OFF"
 	__HEAT_Pin = 2
-	'''__HEAT2_Pin = 17'''
+	__HEAT2_Pin = 17
 	__COOL_Pin = 3
 	__Sensor_Pin=4
 
@@ -28,8 +28,9 @@ class thermostat:
 					self.Mode = kv[1].strip()
 					continue
 		
-		GPIO.setup([self.__HEAT_Pin,self.__COOL_Pin],GPIO.OUT)
-		
+		GPIO.setup([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],GPIO.OUT)
+
+
 		return 
 	
 	''' Read-only attribute'''
@@ -51,11 +52,13 @@ class thermostat:
 	@property 
 	def Status(self):
 		if GPIO.input(self.__HEAT_Pin)==GPIO.LOW:
-			return "HEAT"
+			return "HEAT", "1"
+		elif GPIO.input(self.__HEAT2_Pin)==GPIO.LOW:
+			return "HEAT", "2"
 		elif GPIO.input(self.__COOL_Pin)==GPIO.LOW:
-			return "COOL"
+			return "COOL", ""
 		else:
-			return "OFF"
+			return "OFF", ""
 
 	def Set(self, targetTemp, Mode):
 		self.Target_Temperature = int(targetTemp)
@@ -79,15 +82,15 @@ class thermostat:
 		'''
 		if self.Target_Temperature - temp > 1 and (mode == "HEAT" or mode=="AUTO"):
 			# Set HEAT_1=ON, COOL=OFF
-			GPIO.output([self.__HEAT_Pin,self.__COOL_Pin],(GPIO.LOW, GPIO.HIGH))
+			GPIO.output([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],(GPIO.LOW, GPIO.HIGH, GPIO.HIGH))
 			return "ON"
 		elif temp - self.Target_Temperature > 1 and (mode == "COOL" or mode=="AUTO"):
 			# Process Cool Logic
 			# Set HEAT=OFF, COOL=ON"
-			GPIO.output([self.__HEAT_Pin,self.__COOL_Pin],(GPIO.HIGH, GPIO.LOW))
+			GPIO.output([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],(GPIO.HIGH, GPIO.HIGH, GPIO.LOW))
 			return "ON"
 		else:
-			GPIO.output([self.__HEAT_Pin,self.__COOL_Pin],(GPIO.HIGH, GPIO.HIGH))
+			GPIO.output([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],(GPIO.HIGH, GPIO.HIGH, GPIO.HIGH))
 			return "OFF"
 		GPIO.cleanup()
 			

@@ -7,8 +7,8 @@ os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
 
 t=th.thermostat()
 tp,h=t.Current_Temperature_Humidity
-s=t.Status
-print('{"Current_Temperature":'+str(tp)+',"Current_Humidity":' +str(h) + ',"Status":"' +s+'","Mode":"'+ str(t.Mode) +'","Target_Temperature":'+ str(t.Target_Temperature) +'}')
+s,st=t.Status
+print('{"Current_Temperature":'+str(tp)+',"Current_Humidity":' +str(h) + ',"Status":"' +s+'","Mode":"'+ str(t.Mode) +'","Target_Temperature":'+ str(t.Target_Temperature) + ',"Stage":' + str(st) +'}')
 
 
 
