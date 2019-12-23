@@ -51,10 +51,10 @@ class thermostat:
 
 	@property 
 	def Status(self):
-		if GPIO.input(self.__HEAT_Pin)==GPIO.LOW:
-			return "HEAT", "1"
-		elif GPIO.input(self.__HEAT2_Pin)==GPIO.LOW:
+		if GPIO.input(self.__HEAT2_Pin)==GPIO.LOW:
 			return "HEAT", "2"
+		elif GPIO.input(self.__HEAT_Pin)==GPIO.LOW:
+			return "HEAT", "1"
 		elif GPIO.input(self.__COOL_Pin)==GPIO.LOW:
 			return "COOL", ""
 		else:
@@ -77,7 +77,7 @@ class thermostat:
 		
 		if self.Target_Temperature - temp > 3 and (mode == "HEAT" or mode=="AUTO"):
 			# Set HEAT_2=ON, COOL=OFF
-			GPIO.output([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],(GPIO.HIGH, GPIO.LOW, GPIO.HIGH))
+			GPIO.output([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],(GPIO.LOW, GPIO.LOW, GPIO.HIGH))
 			return "ON"
 		elif self.Target_Temperature - temp > 1 and (mode == "HEAT" or mode=="AUTO"):
 			# Set HEAT_1=ON, COOL=OFF
