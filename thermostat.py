@@ -68,7 +68,7 @@ class thermostat:
 		conf_file.write("TargetTemperature=%s\n" % self.Target_Temperature)
 		conf_file.write("Mode=" + self.Mode + "\n")
 		conf_file.close()
-		self.Process()
+		# self.Process()
 
 	def Process(self):
 		temp=self.Current_Temperature
