@@ -12,7 +12,7 @@ class thermostat:
 	__Sensor_Pin=4
 	# Config parammeters
 	__Calib=0
-	__Imid_action=False
+	__Immed_action=False
 
 
 	__ModeFile="thermostat.mode"
@@ -38,8 +38,18 @@ class thermostat:
 					continue
 		
 		# Read config file
-		#config_file = open(self.__ConfigFile,"r")
-
+		config_file = open(self.__ConfigFile,"r")
+		for line in config_file:
+			if line: 
+				kv = line.split("=")
+				if kv[0] == "calibration":
+					self.__Calib = int(kv[1].strip())
+					continue
+				if kv[0] == "immediate_action":
+					self.__Immed_action = (kv[1].strip()=="True")
+					continue
+		print self.__Calib
+		print self.__Immed_action
 		return 
 	
 	''' Read-only attribute'''
@@ -78,7 +88,7 @@ class thermostat:
 		mode_file.write("TargetTemperature=%s\n" % self.Target_Temperature)
 		mode_file.write("Mode=" + self.Mode + "\n")
 		mode_file.close()
-		if self.__Imid_action:
+		if self.__Immed_action:
 			self.Process()
 
 	def Process(self):
