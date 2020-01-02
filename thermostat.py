@@ -10,14 +10,16 @@ class thermostat:
 	__HEAT2_Pin = 17
 	__COOL_Pin = 3
 	__Sensor_Pin=4
+	__Calib=0
 
-	__ConfigFile="thermostat.conf"
+	__ModeFile="thermostat.mode"
+	__ConfigFile="thermostat.ini"
 
 
 	def __init__(self, **kwargs):
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setwarnings(False)
-		conf_file = open(self.__ConfigFile,"r")
+		conf_file = open(self.__ModeFile,"r")
 		for line in conf_file:
 			if line: 
 				kv = line.split("=")
@@ -38,14 +40,14 @@ class thermostat:
 	def Current_Temperature(self):
 		sensor = Adafruit_DHT.DHT22
 		humidity, temp = Adafruit_DHT.read_retry(sensor,self.__Sensor_Pin)
-		temp = round(temp * 9/5.0 + 32,2)
+		temp = round(temp * 9/5.0 + 32,2)+self.__Calib
 		return temp
 	
 	@property
 	def Current_Temperature_Humidity(self):
 		sensor = Adafruit_DHT.DHT22
 		humidity, temp = Adafruit_DHT.read_retry(sensor,self.__Sensor_Pin)
-		temp = round(temp * 9/5.0 + 32,2)
+		temp = round(temp * 9/5.0 + 32,2)+self.__Calib
 		humidity=round(humidity,2)
 		return temp, humidity
 
@@ -63,7 +65,7 @@ class thermostat:
 	def Set(self, targetTemp, Mode):
 		self.Target_Temperature = int(targetTemp)
 		self.Mode = Mode
-		conf_file = open(self.__ConfigFile,"w+")
+		conf_file = open(self.__ModeFile,"w+")
 		'''with open("thermostat.conf","w") as conf_file:'''
 		conf_file.write("TargetTemperature=%s\n" % self.Target_Temperature)
 		conf_file.write("Mode=" + self.Mode + "\n")
