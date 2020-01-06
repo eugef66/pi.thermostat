@@ -48,8 +48,8 @@ class thermostat:
 				if kv[0] == "immediate_action":
 					self.__Immed_action = (kv[1].strip()=="True")
 					continue
-		print self.__Calib
-		print self.__Immed_action
+		#print self.__Calib
+		#print self.__Immed_action
 		return 
 	
 	''' Read-only attribute'''
@@ -88,7 +88,7 @@ class thermostat:
 		mode_file.write("TargetTemperature=%s\n" % self.Target_Temperature)
 		mode_file.write("Mode=" + self.Mode + "\n")
 		mode_file.close()
-		if self.__Immed_action:
+		if self.__Immed_action or Mode=="OFF":
 			self.Process()
 
 	def Process(self):
