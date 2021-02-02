@@ -1,5 +1,4 @@
 *.php linguist-vendored
-views/* linguist-vendored
 fonts/* linguist-vendored
 css/* linguist-vendored
 js/* linguist-vendored
