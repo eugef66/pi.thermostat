@@ -1,4 +1,4 @@
-# RPIThermostat
+# pi.thermostat
 Python and PHP code for Raspberri PI based web-enabled thermostat
 
 1. Hardware 
