@@ -16,8 +16,8 @@ class thermostat:
 	__HEAT2_Pin = 17
 	__COOL_Pin = 3
 	__Sensor_Pin=4
-	# Config parammeters
 
+	# Config parammeters
 	__Calib=0
 	__Immed_action=False
 
