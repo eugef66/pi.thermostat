@@ -15,8 +15,8 @@ class thermostat:
 	__Immed_action=False
 
 
-	__ModeFile="thermostat.mode"
-	__ConfigFile="thermostat.ini"
+	__ModeFile="thermostat.dat"
+	__ConfigFile="thermostat.conf"
 
 
 	def __init__(self, **kwargs):
