@@ -4,19 +4,22 @@ import RPi.GPIO as GPIO
 import os
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__' 
 class thermostat:
+
+	APP_PATH = os.path.dirname(os.path.abspath(__file__))
+	__ModeFile="thermostat.dat"
+	__ConfigFile="thermostat.conf"
+
 	Target_Temperature = 65
 	Mode = "OFF"
+
 	__HEAT_Pin = 2
 	__HEAT2_Pin = 17
 	__COOL_Pin = 3
 	__Sensor_Pin=4
 	# Config parammeters
+
 	__Calib=0
 	__Immed_action=False
-
-
-	__ModeFile="thermostat.dat"
-	__ConfigFile="thermostat.conf"
 
 
 	def __init__(self, **kwargs):
@@ -25,6 +28,32 @@ class thermostat:
 		GPIO.setwarnings(False)
 		GPIO.setup([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],GPIO.OUT)
 		
+		if (sys.version_info > (3, 0)):
+    		exec(open(APP_PATH + "/thermostat.conf").read())
+		else:
+    		execfile(APP_PATH + "/thermostat.conf")
+
+		self.__Calib = CALIBRATION
+		self.__Immed_action = PERFORM_IMIDIATE_ACTION
+		self.__HEAT_Pin = HEAT_PIN
+		self.__HEAT2_Pin = HEAT_STAGE_2_PIN
+		self.__COOL_Pin = COOL_PIN
+		self.__Sensor_Pin=SENSOR_PIN
+
+		# Read config file
+		#config_file = open(self.__ConfigFile,"r")
+		#for line in config_file:
+		#	if line: 
+		#		kv = line.split("=")
+		#		if kv[0] == "CALIBRATION":
+		#			self.__Calib = int(kv[1].strip())
+		#			continue
+		#		if kv[0] == "PERFORM_IMIDIATE_ACTION":
+		#			self.__Immed_action = (kv[1].strip()=="True")
+		#			continue
+		#print self.__Calib
+		#print self.__Immed_action
+
 		# Read mode file 
 		mode_file = open(self.__ModeFile,"r")
 		for line in mode_file:
@@ -37,19 +66,7 @@ class thermostat:
 					self.Mode = kv[1].strip()
 					continue
 		
-		# Read config file
-		config_file = open(self.__ConfigFile,"r")
-		for line in config_file:
-			if line: 
-				kv = line.split("=")
-				if kv[0] == "calibration":
-					self.__Calib = int(kv[1].strip())
-					continue
-				if kv[0] == "immediate_action":
-					self.__Immed_action = (kv[1].strip()=="True")
-					continue
-		#print self.__Calib
-		#print self.__Immed_action
+		
 		return 
 	
 	''' Read-only attribute'''
