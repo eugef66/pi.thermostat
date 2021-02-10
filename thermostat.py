@@ -1,15 +1,19 @@
 import subprocess
-import Adafruit_DHT
 import sys
-import RPi.GPIO as GPIO
 import os
+import config
+
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__' 
 
-APP_PATH = os.path.dirname(os.path.abspath(__file__))
-if (sys.version_info > (3, 0)):
-	exec(open(APP_PATH + "/thermostat.conf").read())
-else:
-	execfile(APP_PATH + "/thermostat.conf")
+#APP_PATH = os.path.dirname(os.path.abspath(__file__))
+#if (sys.version_info > (3, 0)):
+#	exec(open(APP_PATH + "/thermostat.conf").read())
+#else:
+#	execfile(APP_PATH + "/thermostat.conf")
+
+
+import Adafruit_DHT
+import RPi.GPIO as GPIO
 
 
 class thermostat:
@@ -39,12 +43,12 @@ class thermostat:
 		
 		
 
-		self.__Calib = CALIBRATION
-		self.__Immed_action = PERFORM_IMIDIATE_ACTION
-		self.__HEAT_Pin = HEAT_PIN
-		self.__HEAT2_Pin = HEAT_STAGE_2_PIN
-		self.__COOL_Pin = COOL_PIN
-		self.__Sensor_Pin=SENSOR_PIN
+		self.__Calib = config.CALIBRATION
+		self.__Immed_action = config.PERFORM_IMIDIATE_ACTION
+		self.__HEAT_Pin = config.HEAT_PIN
+		self.__HEAT2_Pin = config.HEAT_STAGE_2_PIN
+		self.__COOL_Pin = config.COOL_PIN
+		self.__Sensor_Pin=config.SENSOR_PIN
 
 		# Read config file
 		#config_file = open(self.__ConfigFile,"r")

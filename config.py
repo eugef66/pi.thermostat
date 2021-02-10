@@ -1,6 +1,7 @@
+import sys
 
-GPIO_EMULATOR_MODE = True
-
+# Uncomment the line below to use GPIO emulator and change path to emulators module
+sys.path.append("../pi.emulators")
 
 CALIBRATION=0
 PERFORM_IMIDIATE_ACTION=True

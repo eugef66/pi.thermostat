@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "set.py",
             "console": "integratedTerminal",
-            "args": ["t=72", "m=HEAT"]
+            "args": ["t=70", "m=COOL"]
 
         },
         {
