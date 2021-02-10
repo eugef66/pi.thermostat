@@ -1,11 +1,20 @@
 import subprocess
 import Adafruit_DHT
+import sys
 import RPi.GPIO as GPIO
 import os
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__' 
+
+APP_PATH = os.path.dirname(os.path.abspath(__file__))
+if (sys.version_info > (3, 0)):
+	exec(open(APP_PATH + "/thermostat.conf").read())
+else:
+	execfile(APP_PATH + "/thermostat.conf")
+
+
 class thermostat:
 
-	APP_PATH = os.path.dirname(os.path.abspath(__file__))
+	
 	__ModeFile="thermostat.dat"
 	__ConfigFile="thermostat.conf"
 
@@ -28,10 +37,7 @@ class thermostat:
 		GPIO.setwarnings(False)
 		GPIO.setup([self.__HEAT_Pin,self.__HEAT2_Pin,self.__COOL_Pin],GPIO.OUT)
 		
-		if (sys.version_info > (3, 0)):
-    		exec(open(APP_PATH + "/thermostat.conf").read())
-		else:
-    		execfile(APP_PATH + "/thermostat.conf")
+		
 
 		self.__Calib = CALIBRATION
 		self.__Immed_action = PERFORM_IMIDIATE_ACTION
