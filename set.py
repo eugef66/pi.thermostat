@@ -11,6 +11,7 @@ os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
 t=th.thermostat()
 targetTemp=t.Target_Temperature
 mode=t.Mode
+schedule = None
 
 for a in sys.argv:
 	if "t=" in a and a[2:]!='':
@@ -19,9 +20,12 @@ for a in sys.argv:
 	if "m=" in a and a[2:]!='':
 		mode=a[2:]
 		continue
+	if "s=" in a and a[2:]!='':
+		schedule=a[2:]
+		continue
 #print (targetTemp)
 #print (mode)
-t.Set(targetTemp,mode)
+t.Set(targetTemp,mode,schedule)
 import get
 
 	

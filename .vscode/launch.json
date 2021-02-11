@@ -1,38 +1,41 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Set",
-            "type": "python",
-            "request": "launch",
-            "program": "set.py",
-            "console": "integratedTerminal",
-            "args": ["t=70", "m=COOL"]
-
-        },
-        {
-            "name": "Get",
-            "type": "python",
-            "request": "launch",
-            "program": "get.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Process",
-            "type": "python",
-            "request": "launch",
-            "program": "proc.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
-        }
-    ]
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Set",
+			"type": "python",
+			"request": "launch",
+			"program": "set.py",
+			"console": "integratedTerminal",
+			"args": [
+				"t=70",
+				"m=COOL",
+				"s=2021-02-12 13:00"
+			]
+		},
+		{
+			"name": "Get",
+			"type": "python",
+			"request": "launch",
+			"program": "get.py",
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "Process",
+			"type": "python",
+			"request": "launch",
+			"program": "proc.py",
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "Python: Current File",
+			"type": "python",
+			"request": "launch",
+			"program": "${file}",
+			"console": "integratedTerminal"
+		}
+	]
 }

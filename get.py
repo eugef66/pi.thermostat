@@ -5,6 +5,7 @@ import thermostat as th
 import os
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__' 
 
+
 t=th.thermostat()
 tp,h=t.Current_Temperature_Humidity
 s,st=t.Status

@@ -12,6 +12,7 @@ os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
+
 # if (sys.version_info > (3, 0)):
 #    exec(open(APP_PATH + "/thermostat.conf").read())
 # else:
@@ -110,10 +111,14 @@ class thermostat:
 			return "OFF", ""
 
 	
-	def Set(self, targetTemp, Mode, schedule=datetime.now()):
+	def Set(self, targetTemp, Mode, schedule=None):
+
+		if (schedule==None):
+			schedule = datetime.now().strftime('%Y-%m-%d %H:%M')
+
 		self.__db["mode"]=Mode
 		self.__db["target_temperature"]=int(targetTemp)
-		self.__db["schedule"]=schedule.isoformat()
+		self.__db["schedule"]=schedule
 		self.__save_db()
 		if self.__Immed_action or Mode == "OFF":
 			self.Process()
@@ -122,28 +127,32 @@ class thermostat:
 		temp = self.Current_Temperature
 		mode = self.__db["mode"]
 		target_temperature = self.__db["target_temperature"]
-
-		if target_temperature - temp > 3 and (mode == "HEAT" or mode == "AUTO"):
-			# Set HEAT_2=ON, COOL=OFF
-			GPIO.output([self.__HEAT_Pin, self.__HEAT2_Pin, self.__COOL_Pin],
-						(GPIO.LOW, GPIO.LOW, GPIO.HIGH))
-			return "ON"
-		elif target_temperature - temp > 1 and (mode == "HEAT" or mode == "AUTO"):
-			# Set HEAT_1=ON, COOL=OFF
-			GPIO.output([self.__HEAT_Pin, self.__HEAT2_Pin, self.__COOL_Pin],
-						(GPIO.LOW, GPIO.HIGH, GPIO.HIGH))
-			return "ON"
-		elif temp - target_temperature > 1 and (mode == "COOL" or mode == "AUTO"):
-			# Process Cool Logic
-			# Set HEAT=OFF, COOL=ON"
-			GPIO.output([self.__HEAT_Pin, self.__HEAT2_Pin, self.__COOL_Pin],
-						(GPIO.HIGH, GPIO.HIGH, GPIO.LOW))
-			return "ON"
-		else:
-			GPIO.output([self.__HEAT_Pin, self.__HEAT2_Pin, self.__COOL_Pin],
-						(GPIO.HIGH, GPIO.HIGH, GPIO.HIGH))
-			return "OFF"
-		GPIO.cleanup()
+		schedule = self.__db["schedule"]
+		schedule = datetime.strptime(schedule, '%Y-%m-%d %H:%M')
+		
+		# Perfrom process only if current date and time aftre scheduled one
+		if (datetime.now() > schedule):
+			if target_temperature - temp > 3 and (mode == "HEAT" or mode == "AUTO"):
+				# Set HEAT_2=ON, COOL=OFF
+				GPIO.output([self.__HEAT_Pin, self.__HEAT2_Pin, self.__COOL_Pin],
+							(GPIO.LOW, GPIO.LOW, GPIO.HIGH))
+				return "ON"
+			elif target_temperature - temp > 1 and (mode == "HEAT" or mode == "AUTO"):
+				# Set HEAT_1=ON, COOL=OFF
+				GPIO.output([self.__HEAT_Pin, self.__HEAT2_Pin, self.__COOL_Pin],
+							(GPIO.LOW, GPIO.HIGH, GPIO.HIGH))
+				return "ON"
+			elif temp - target_temperature > 1 and (mode == "COOL" or mode == "AUTO"):
+				# Process Cool Logic
+				# Set HEAT=OFF, COOL=ON"
+				GPIO.output([self.__HEAT_Pin, self.__HEAT2_Pin, self.__COOL_Pin],
+							(GPIO.HIGH, GPIO.HIGH, GPIO.LOW))
+				return "ON"
+			else:
+				GPIO.output([self.__HEAT_Pin, self.__HEAT2_Pin, self.__COOL_Pin],
+							(GPIO.HIGH, GPIO.HIGH, GPIO.HIGH))
+				return "OFF"
+			GPIO.cleanup()
 
 	def __load_db(self):
 		if (os.path.exists(APP_PATH + "/db.json")):

@@ -19,7 +19,7 @@ def set(mode, temp):
 	if a.is_logged_in:
 		t=th.thermostat()
 		t.Set(temp,mode)
-		return redirect('/');
+		return redirect('/')
 
 @route('/login')
 def login():
@@ -38,19 +38,19 @@ def do_login():
 # static files
 @route('/images/<filename>')
 def images(filename):
-	return static_file(filename, root='/home/pi/Apps/Thermostat/images');
+	return static_file(filename, root='/home/pi/Apps/Thermostat/images')
 
 @route('/css/<filename>')
 def css(filename):
-	return static_file(filename, root='/home/pi/Apps/Thermostat/css');
+	return static_file(filename, root='/home/pi/Apps/Thermostat/css')
 
 @route('/fonts/<filename>')
 def css(filename):
-	return static_file(filename, root='/home/pi/Apps/Thermostat/fonts');
+	return static_file(filename, root='/home/pi/Apps/Thermostat/fonts')
 
 @route('/js/<filename>')
 def css(filename):
-	return static_file(filename, root='/home/pi/Apps/Thermostat/js');
+	return static_file(filename, root='/home/pi/Apps/Thermostat/js')
 
 print(__name__)
 

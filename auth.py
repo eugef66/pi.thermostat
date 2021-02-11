@@ -9,7 +9,7 @@ class auth_session:
 	
 	session_timeout = 20
 	__session_data={}
-	logaout_redirect_url="/login"
+	logout_redirect_url="/login"
 	
 	def __init__(self, **kwarg):
 		self.save_session()
