@@ -21,6 +21,13 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "Process",
+            "type": "python",
+            "request": "launch",
+            "program": "proc.py",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",

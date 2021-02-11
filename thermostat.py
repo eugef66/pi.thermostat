@@ -18,6 +18,7 @@ APP_PATH = os.path.dirname(os.path.abspath(__file__))
 #    execfile(APP_PATH + "/thermostat.conf")
 
 class thermostat:
+	
 
 	__db = {}
 
@@ -77,6 +78,12 @@ class thermostat:
 
 	''' Read-only attribute'''
 	@property
+	def Target_Temperature(self):
+		return self.__db["target_temperature"]
+	@property
+	def Mode(self):
+		return self.__db["mode"]
+	@property
 	def Current_Temperature(self):
 		sensor = Adafruit_DHT.DHT22
 		humidity, temp = Adafruit_DHT.read_retry(sensor, self.__Sensor_Pin)
@@ -102,9 +109,11 @@ class thermostat:
 		else:
 			return "OFF", ""
 
-	def Set(self, targetTemp, Mode):
+	
+	def Set(self, targetTemp, Mode, schedule=datetime.now()):
 		self.__db["mode"]=Mode
 		self.__db["target_temperature"]=int(targetTemp)
+		self.__db["schedule"]=schedule.isoformat()
 		self.__save_db()
 		if self.__Immed_action or Mode == "OFF":
 			self.Process()
@@ -143,7 +152,7 @@ class thermostat:
 		else:
 			self.__db = {"mode": "OFF",
 				   "target_temperature": 72,
-				   "schedule": datetime.now()}
+				   "schedule": datetime.now().isoformat()}
 			self.__save_db()
 		return
 
