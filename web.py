@@ -1,10 +1,13 @@
-from bottle import route, run, template, jinja2_template as template, static_file, redirect, request
+import os
+from bottle import route, run, template, static_file, redirect, request
 import thermostat as th
 from auth import auth_session
 
 
 a=auth_session()
 a.logout_redirect_url="/login"
+
+APP_PATH = os.path.dirname(os.path.abspath(__file__))
 
 @route('/')
 def index():
@@ -23,7 +26,7 @@ def set(mode, temp):
 
 @route('/login')
 def login():
-	return template('login_template')
+	return template('login_template',Message=None)
 
 @route('/login', method='POST')
 def do_login():
@@ -38,21 +41,21 @@ def do_login():
 # static files
 @route('/images/<filename>')
 def images(filename):
-	return static_file(filename, root='/home/pi/Apps/Thermostat/images')
+	return static_file(filename, root= APP_PATH + '/images')
 
 @route('/css/<filename>')
 def css(filename):
-	return static_file(filename, root='/home/pi/Apps/Thermostat/css')
+	return static_file(filename, root=APP_PATH + '/css')
 
 @route('/fonts/<filename>')
 def css(filename):
-	return static_file(filename, root='/home/pi/Apps/Thermostat/fonts')
+	return static_file(filename, root=APP_PATH + '/fonts')
 
 @route('/js/<filename>')
 def css(filename):
-	return static_file(filename, root='/home/pi/Apps/Thermostat/js')
+	return static_file(filename, root=APP_PATH + '/js')
 
-print(__name__)
+#print(__name__)
 
 if __name__=='__main__':
-	run(host='localhost', port=9981)
+	run(host='localhost', port=9988)

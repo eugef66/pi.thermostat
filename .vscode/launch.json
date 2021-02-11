@@ -5,6 +5,13 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Web",
+			"type": "python",
+			"request": "launch",
+			"program": "web.py",
+			"console": "integratedTerminal"
+		},
+		{
 			"name": "Set",
 			"type": "python",
 			"request": "launch",
