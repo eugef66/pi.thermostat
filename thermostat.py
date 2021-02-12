@@ -47,6 +47,9 @@ class thermostat:
 	def Mode(self):
 		return self.__db["mode"]
 	@property
+	def Schedule(self):
+		return self.__db["schedule"]
+	@property
 	def Current_Temperature(self):
 		sensor = Adafruit_DHT.DHT22
 		humidity, temp = Adafruit_DHT.read_retry(sensor, config.SENSOR_PIN)
@@ -60,15 +63,17 @@ class thermostat:
 		temp = round(temp * 9/5.0 + 32, 2) + config.CALIBRATION
 		humidity = round(humidity, 2)
 		return temp, humidity
-
+	
 	@property
 	def Status(self):
-		if GPIO.input(config.HEAT_STAGE_2_PIN) == GPIO.LOW:
+		if config.HEAT_TWO_STAGE and GPIO.input(config.HEAT_STAGE_2_PIN) == GPIO.LOW:
 			return "HEAT", "2"
+		elif config.COOL_TWO_STAGE and GPIO.input(config.COOL_STAGE_2_PIN) == GPIO.LOW:
+			return "COOL", "2"
 		elif GPIO.input(config.HEAT_PIN) == GPIO.LOW:
-			return "HEAT", "1"
+			return "HEAT", "1" if config.HEAT_TWO_STAGE else ""
 		elif GPIO.input(config.COOL_PIN) == GPIO.LOW:
-			return "COOL", ""
+			return "COOL", "1" if config.COOL_TWO_STAGE else ""
 		else:
 			return "OFF", ""
 
@@ -92,34 +97,53 @@ class thermostat:
 		schedule = self.__db["schedule"]
 		schedule = datetime.strptime(schedule, '%Y-%m-%d %H:%M')
 		
-		#TODO: The logiv below is wrong (issue #3)
+		#TODO: The logic below is wrong (issue #3)
 		# Modify process to take into consideration 2 stage pins may not be set
+		# LOW = ON
+		# HIGH = OFF
+
 
 		# Perfrom process only if current date and time aftre scheduled one
-		if (datetime.now() > schedule):
-			if config.HEAT_TWO_STAGE and target_temperature - temp > 3 and (mode == "HEAT" or mode == "AUTO"):
+		if (datetime.now() > schedule or mode=="OFF"):
+			if target_temperature - temp > 3 and (mode == "HEAT" or mode == "AUTO"):
 				# Set HEAT_2=ON, COOL=OFF
-				GPIO.output([config.HEAT_PIN, config.HEAT_STAGE_2_PIN, config.COOL_PIN],
-							(GPIO.LOW, GPIO.LOW, GPIO.HIGH))
+				GPIO.output([config.HEAT_PIN, config.COOL_PIN],(GPIO.LOW, GPIO.HIGH))
+				if (config.HEAT_TWO_STAGE):
+					GPIO.output([config.HEAT_STAGE_2_PIN],GPIO.LOW)
+				if (config.COOL_TWO_STAGE):
+					GPIO.output([config.COOL_STAGE_2_PIN],GPIO.HIGH)
 				return "ON"
 			elif target_temperature - temp > 1 and (mode == "HEAT" or mode == "AUTO"):
 				# Set HEAT_1=ON, COOL=OFF
-				GPIO.output([config.HEAT_PIN, config.HEAT_STAGE_2_PIN, config.COOL_PIN],
-							(GPIO.LOW, GPIO.HIGH, GPIO.HIGH))
+				GPIO.output([config.HEAT_PIN, config.COOL_PIN],(GPIO.LOW, GPIO.HIGH))
+				if (config.HEAT_TWO_STAGE):
+					GPIO.output([config.HEAT_STAGE_2_PIN],GPIO.HIGH)
+				if (config.COOL_TWO_STAGE):
+					GPIO.output([config.COOL_STAGE_2_PIN],GPIO.HIGH)
+
 				return "ON"
-			elif config.COOL_TWO_STAGE and temp - target_temperature > 3 and (mode == "COOL" or mode == "AUTO"):
+			elif temp - target_temperature > 3 and (mode == "COOL" or mode == "AUTO"):
 				# Set HEAT=OFF, COOL=ON"
-				GPIO.output([config.HEAT_PIN, config.HEAT_STAGE_2_PIN, config.COOL_PIN],
-							(GPIO.HIGH, GPIO.HIGH, GPIO.LOW))
+				GPIO.output([config.HEAT_PIN, config.COOL_PIN],(GPIO.HIGH, GPIO.LOW))
+				if (config.HEAT_TWO_STAGE):
+					GPIO.output([config.HEAT_STAGE_2_PIN],GPIO.HIGH)
+				if (config.COOL_TWO_STAGE):
+					GPIO.output([config.COOL_STAGE_2_PIN],GPIO.LOW)
 				return "ON"
 			elif temp - target_temperature > 1 and (mode == "COOL" or mode == "AUTO"):
-				# Set HEAT=OFF, COOL=ON"
-				GPIO.output([config.HEAT_PIN, config.HEAT_STAGE_2_PIN, config.COOL_PIN],
-							(GPIO.HIGH, GPIO.HIGH, GPIO.LOW))
+				# Set HEAT = OFF, COOL=ON
+				GPIO.output([config.HEAT_PIN, config.COOL_PIN],(GPIO.HIGH, GPIO.LOW))
+				if (config.HEAT_TWO_STAGE):
+					GPIO.output([config.HEAT_STAGE_2_PIN],GPIO.HIGH)
+				if (config.COOL_TWO_STAGE):
+					GPIO.output([config.COOL_STAGE_2_PIN],GPIO.HIGH)
 				return "ON"
 			else:
-				GPIO.output([config.HEAT_PIN, config.HEAT_STAGE_2_PIN, config.COOL_PIN],
-							(GPIO.HIGH, GPIO.HIGH, GPIO.HIGH))
+				GPIO.output([config.HEAT_PIN, config.COOL_PIN],(GPIO.HIGH, GPIO.HIGH))
+				if (config.HEAT_TWO_STAGE):
+					GPIO.output([config.HEAT_STAGE_2_PIN],GPIO.HIGH)
+				if (config.COOL_TWO_STAGE):
+					GPIO.output([config.COOL_STAGE_2_PIN],GPIO.HIGH)
 				return "OFF"
 			GPIO.cleanup()
 
@@ -138,3 +162,7 @@ class thermostat:
 		with open(APP_PATH + "/db.json", "w+") as db_file:
 			db_file.write(json.dumps(self.__db, indent=4))
 		return
+
+if (__name__=="__main__"):
+	th = thermostat()
+	print (th.Status)

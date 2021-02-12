@@ -28,12 +28,17 @@
     <meta name="theme-color" content="#ffffff" />
     
     <script lang="javascript">
-    function doSubmit(mode)
+    function doSubmit(mode,dt_id)
     {
+		schedule=null;
+		if (dt_id){
+			schedule = document.getElementById(dt_id).value;
+			alert(schedule);
+		}
         var mode = (mode==null ? document.getElementById('mode').value:mode);
         var targetTemp = document.getElementById('targetTemp');
         var temp = (targetTemp==null? document.getElementById('temp').value:targetTemp.value);
-        var url = "/set/" + mode + "/" + temp;
+        var url = "/set/" + mode + "/" + temp + "?sch=" + (schedule?schedule:null);
         //alert (url);
         location.replace(url);
     }
@@ -63,13 +68,25 @@
                 <!-- Third Row-->
                 <div class="row">
                     <div class="col-xs-12">
-                        <button type="button" id="COOL" value="COOL" onClick="doSubmit('COOL')"
-                            % if Current_Mode=='COOL':
-                             class="btn btn-lg btn-primary active" disabled="disabled"
-                            % else:
-                             class="btn btn-lg btn-default"
-                            % end 
-                            >COOL</button>
+						<div class="btn-group">
+							<%	cl='btn-default'
+								dis=''
+							if Current_Mode=='COOL':
+								cl='btn-primary active' 
+								dis='disabled=disabled'
+							end
+							%>
+							<button type="button" id="COOL" value="COOL" onClick="doSubmit('COOL')" class='btn btn-lg {{cl}}' {{dis}}>COOL</button>
+								<button type="button" class="btn btn-lg {{cl}} dropdown-toggle" {{dis}} data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<span class="caret"></span>
+									<span class="sr-only">Toggle Dropdown</span>
+								</button>
+								<ul class="dropdown-menu">
+									<li>
+										<input type="text" value="2021-02-12 13:00:00" id="cool_schedule"/><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','cool_schedule')">OK</a>
+									</li>
+								</ul>
+						</div>
                         <button type="button" id="OFF" value="OFF" onClick="doSubmit('OFF')"
                             % if Current_Mode=='OFF': 
                                 class="btn btn-lg btn-warning active" disabled="disabled"
@@ -77,25 +94,59 @@
                                 class="btn btn-lg btn-default"
                             %end 
                             >&nbsp;OFF&nbsp;</button>
-                        <button type="button"  id="HEAT" value="HEAT" onClick="doSubmit('HEAT')"
-                            % if Current_Mode=='HEAT':
-                                class="btn btn-lg btn-danger active" disabled="disabled"
-                            % else: 
-                                class="btn btn-lg btn-default"
-                            % end
-                            >HEAT</button>
-                        <button type="button" id="AUTO" value="AUTO" onClick="doSubmit('AUTO')"
-                            % if Current_Mode=='AUTO':
-                                class="btn btn-lg btn-success active" disabled="disabled"
-                            % else: 
-                                class="btn btn-lg btn-default"
-                            % end
-                            >AUTO</button>
+						<div class="btn-group">
+						<%	cl='btn btn-lg btn-default'
+							dis=''
+						if Current_Mode=='HEAT':
+							cl='btn btn-lg btn-danger active' 
+							dis='disabled=disabled'
+						end
+						%>
+						<button type="button"  id="HEAT" value="HEAT" onClick="doSubmit('HEAT')" class='{{cl}}'{{dis}}>HEAT</button>
+						<button type="button" class="btn btn-lg {{cl}} dropdown-toggle" {{dis}} data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="caret"></span>
+							<span class="sr-only">Toggle Dropdown</span>
+						</button>
+						<ul class="dropdown-menu">
+							<li>
+								<li>
+									<input type="text" value="2021-02-12 13:00:00" id="heat_schedule"/><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','heat_schedule')">OK</a>
+								</li>
+							</li>
+						</ul>
+						</div>
+						<div class="btn-group">
+						<%	cl='btn btn-lg btn-default'
+							dis=''
+						if Current_Mode=='AUTO':
+							cl='btn btn-lg btn-success active' 
+							dis='disabled=disabled'
+						end
+						%>
+                        <button type="button" id="AUTO" value="AUTO" onClick="doSubmit('AUTO')" class='{{cl}}'{{dis}} >AUTO</button>
+						<button type="button" class="btn btn-lg {{cl}} dropdown-toggle" {{dis}} data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="caret"></span>
+							<span class="sr-only">Toggle Dropdown</span>
+						</button>
+						<ul class="dropdown-menu">
+							<li>
+								<li>
+									<input type="text" value="2021-02-12 13:00:00" id="auto_schedule"/><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','auto_schedule')">OK</a>
+								</li>
+							</li>
+						</ul>
+						</div>
                     </div>
                 </div>
                 
                 % if Current_Mode != "OFF":
-                <!-- Forth Row-->
+				<!-- Forth Row-->
+				<div class="row">
+                    <div class="col-xs-12">
+						<h4 class="text-center">Starts at: 2021-02-11 13:00</h4>
+					</div>
+				</div>
+                <!-- Fifth Row-->
                 <div class="row">
                     <div class="col-xs-12">
                     <% c="black"
@@ -108,9 +159,9 @@
     
                         <h1 style="color:{{c}}"> 
                             % if Status=='HEAT':
-                            <span class="glyphicon glyphicon-fire"  aria-hidden="true"></span><small style="color:red">{{Stage}}</small>
+                            <span class="glyphicon glyphicon-fire"  aria-hidden="true"></span><small style="color: {{c}};">{{Stage}}</small>
                             % elif Status=='COOL':
-                            <span class="glyphicon glyphicon-asterisk"  aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-asterisk"  aria-hidden="true"></span><small style="color: {{c}};">{{Stage}}</small>
                             % else:
                             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
                             % end

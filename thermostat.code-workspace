@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\pi.emulators"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "pi.thermostat"
+	}
+}
