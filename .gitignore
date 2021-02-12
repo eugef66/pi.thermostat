@@ -2,4 +2,4 @@ Adafruit_DHT.py
 /RPi
 /__pycache__
 db.json
-
+.session
