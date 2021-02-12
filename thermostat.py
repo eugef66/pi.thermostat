@@ -96,14 +96,11 @@ class thermostat:
 		target_temperature = self.__db["target_temperature"]
 		schedule = self.__db["schedule"]
 		schedule = datetime.strptime(schedule, '%Y-%m-%d %H:%M')
-		
-		#TODO: The logic below is wrong (issue #3)
-		# Modify process to take into consideration 2 stage pins may not be set
+
 		# LOW = ON
 		# HIGH = OFF
 
-
-		# Perfrom process only if current date and time aftre scheduled one
+		# Perfrom process only if current date and time aftre scheduled one except "OFF". "OFF" performed imideately
 		if (datetime.now() > schedule or mode=="OFF"):
 			if target_temperature - temp > 3 and (mode == "HEAT" or mode == "AUTO"):
 				# Set HEAT_2=ON, COOL=OFF
