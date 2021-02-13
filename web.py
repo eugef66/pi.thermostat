@@ -21,9 +21,12 @@ def index():
 def set(mode, temp):
 	if a.is_logged_in:
 		schedule = request.GET.get('sch')
-		print (schedule)
+		print (len(schedule))
 		t=th.thermostat()
-		t.Set(temp,mode)
+		if (len(schedule)>15):
+			t.Set(temp,mode,schedule)
+		else:
+			t.Set(temp,mode)
 		return redirect('/')
 
 @route('/login')

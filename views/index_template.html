@@ -30,7 +30,7 @@
     <script lang="javascript">
     function doSubmit(mode,dt_id)
     {
-		schedule=null;
+		schedule="";
 		if (dt_id){
 			schedule = document.getElementById(dt_id).value;
 			alert(schedule);
@@ -38,7 +38,7 @@
         var mode = (mode==null ? document.getElementById('mode').value:mode);
         var targetTemp = document.getElementById('targetTemp');
         var temp = (targetTemp==null? document.getElementById('temp').value:targetTemp.value);
-        var url = "/set/" + mode + "/" + temp + "?sch=" + (schedule?schedule:null);
+        var url = "/set/" + mode + "/" + temp + "?sch=" + (schedule?schedule:"");
         //alert (url);
         location.replace(url);
     }
@@ -83,7 +83,7 @@
 								</button>
 								<ul class="dropdown-menu">
 									<li>
-										<input type="text" value="2021-02-12 13:00:00" id="cool_schedule"/><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','cool_schedule')">OK</a>
+										<input type="text" value="2021-02-12 13:00" id="cool_schedule"/><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','cool_schedule')">OK</a>
 									</li>
 								</ul>
 						</div>
@@ -109,9 +109,7 @@
 						</button>
 						<ul class="dropdown-menu">
 							<li>
-								<li>
-									<input type="text" value="2021-02-12 13:00:00" id="heat_schedule"/><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','heat_schedule')">OK</a>
-								</li>
+									<input type="text" value="2021-02-12 13:00:00" id="heat_schedule"><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','heat_schedule')">OK</a>
 							</li>
 						</ul>
 						</div>
@@ -129,11 +127,11 @@
 							<span class="sr-only">Toggle Dropdown</span>
 						</button>
 						<ul class="dropdown-menu">
-							<li>
+							
 								<li>
-									<input type="text" value="2021-02-12 13:00:00" id="auto_schedule"/><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','auto_schedule')">OK</a>
+									<input type="text" value="2021-02-12 13:00" id="auto_schedule"/><a class="btn bt-lg {{cl}}" href="javascript:doSubmit('COOL','auto_schedule')">OK</a>
 								</li>
-							</li>
+							
 						</ul>
 						</div>
                     </div>
@@ -143,7 +141,7 @@
 				<!-- Forth Row-->
 				<div class="row">
                     <div class="col-xs-12">
-						<h4 class="text-center">Starts at: 2021-02-11 13:00</h4>
+						<h4 class="text-center">Starts at {{Schedule}}</h4>
 					</div>
 				</div>
                 <!-- Fifth Row-->
