@@ -3,3 +3,4 @@ Adafruit_DHT.py
 /__pycache__
 db.json
 .session
+*.code-workspace
