@@ -1,10 +1,10 @@
 import os
 from bottle import route, run, template, static_file, redirect, request
 import thermostat as th
-from auth import auth_session
+import auth #import auth_session
 
 
-a=auth_session()
+a=auth.auth_session()
 a.logout_redirect_url="/login"
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))

@@ -1,11 +1,16 @@
 import uuid
 import hashlib
 import json
+import os
+
 from  datetime import datetime, date
 from bottle import response, request, redirect
 
+import auth_pin
+
 
 class auth_session:
+	
 	
 	session_timeout = 20
 	__session_data={}
@@ -23,7 +28,7 @@ class auth_session:
 	
 	def login(self, pin):
 		pin_hash = hashlib.sha256(pin.encode()).hexdigest()
-		if pin_hash == '1b8ba0b107410f67c70ab6ed4abf4e0ec0e70df78298e41d1670c7c1e94a703f':
+		if pin_hash == auth_pin.PIN_CODE:
 			#create UUID
 			sid = str(uuid.uuid1())
 			dt = str (datetime.now())

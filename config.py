@@ -3,6 +3,8 @@ import sys
 # Uncomment the line below to use GPIO emulator and change path to emulators module
 sys.path.append("../pi.emulators")
 
+
+
 CALIBRATION=0
 PERFORM_IMIDIATE_ACTION=True
 
@@ -15,5 +17,5 @@ COOL_PIN = 3
 HEAT_TWO_STAGE=True
 HEAT_STAGE_2_PIN = 17
 
-COOL_TWO_STAGE = True
+COOL_TWO_STAGE = False
 COOL_STAGE_2_PIN = 18
