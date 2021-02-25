@@ -1,8 +1,6 @@
 import os
 import web
 import thermostat as th
-import config
-import RPi.GPIO as GPIO
 
 
 abspath = os.path.abspath(__file__)
