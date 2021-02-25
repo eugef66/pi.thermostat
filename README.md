@@ -1,14 +1,14 @@
 # pi.thermostat
 Python and PHP code for Raspberri PI based web-enabled thermostat
 
-1. Hardware 
+## 1. Hardware 
 
  - Raspberri PI 3B with power adapter 
  - DHT22 Themperature sensor - https://www.amazon.com/gp/product/B073F472JL
  - DC 5V Relay Module  - https://www.amazon.com/gp/product/B07YRYBLSZ
  - Breadboard jumper wires (Female-Female) - https://www.amazon.com/gp/product/B07GD2BWPY
 
-2. Software Prerequisite
+## 2. Software Prerequisite
 
   - Raspbian OS
   - Apache2 
@@ -18,14 +18,23 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
   - RPi.GPIO Python module (https://pypi.org/project/RPi.GPIO/)
   - Adafruit_DHT Python module (https://github.com/adafruit/Adafruit_Python_DHT) 
 
-3. Installation instructions
+## 3. Installation instructions
 
- - Cron job:
-	sudo crontab -e 
-		* * * * * python <app directory>/proc.py >> <app directory>/proc.log 2>&1
- - Simple self-running (no Apache):
+ ### cron job 
+ 	sudo crontab -e 
+add following command. Replace "app directory" with your working directory
+	
+	* * * * * python "app directory"/proc.py >> "app directory"/proc.log 2>&1
  
- - Advanced (with Apache2 server):
+ ### Simple self-running (no Apache):
+This installation allows you to run thermostat using included "bottle" web server and doesn't require Apache, Lighttpd or other web servers installed. It is single-threaded and slow, but a good choice for a simple and quick setup if light use is excpected. 
+
+	sudo nano /etc/rc.local
+add following command before `exit(0)`
+
+	python "app directroy"/startup.py >> "app directory"/app.log 2>&1
+ 
+ ### Advanced (with Apache2 server):
   
   1. set default state of pins at boot
       - sudo nano /etc/rc.local
