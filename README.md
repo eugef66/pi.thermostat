@@ -20,9 +20,12 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
 
 3. Installation instructions
 
- - Simple self-running (no Apache)
- - 
- - Advanced with Apache2 server 
+ - Cron job:
+	sudo crontab -e 
+		python <app directory>/proc.py >> <app directory>/proc.log 2>&1
+ - Simple self-running (no Apache):
+ 
+ - Advanced (with Apache2 server):
   
   1. set default state of pins at boot
       - sudo nano /etc/rc.local
