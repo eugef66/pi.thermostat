@@ -160,7 +160,7 @@ def get():
 	tp,h=t.Current_Temperature_Humidity
 	s,st=t.Status
 	print(" ")
-	print("Temperature: " +str(tp) + "°F")
+	print("Temperature: " +str(tp) + "F")
 	print("Humidity: " +str(h) + "%") 
 	print("Status: " + s + " " + str(st))
 	print(" ")
@@ -196,7 +196,7 @@ def set():
 def proc():
 	t=thermostat()
 	t.Process()
-	
+
 
 if (__name__=="__main__"):
 	if (len(sys.argv)<=1):
