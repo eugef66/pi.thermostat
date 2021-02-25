@@ -22,7 +22,7 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
 
  - Cron job:
 	sudo crontab -e 
-		python <app directory>/proc.py >> <app directory>/proc.log 2>&1
+		* * * * * python <app directory>/proc.py >> <app directory>/proc.log 2>&1
  - Simple self-running (no Apache):
  
  - Advanced (with Apache2 server):
