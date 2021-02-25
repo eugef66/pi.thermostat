@@ -61,6 +61,8 @@ def css(filename):
 	return static_file(filename, root=APP_PATH + '/js')
 
 #print(__name__)
+def start():
+	run(host='0.0.0.0', port=9988)
 
 if __name__=='__main__':
-	run(host='localhost', port=9988)
+	start()
