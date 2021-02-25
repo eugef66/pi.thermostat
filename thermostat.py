@@ -165,7 +165,7 @@ def get():
 	print("Status: " + s + " " + str(st))
 	print(" ")
 	print ("Mode: " + str(t.Mode))
-	print ("Target Temperature: " + str(t.Target_Temperature) +  "°F")
+	print ("Target Temperature: " + str(t.Target_Temperature) +  "F")
 	print ("Schedule: " + str(t.Schedule))
 	print(" ")
 
