@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import subprocess
 import sys
 import os
@@ -11,12 +12,6 @@ import Adafruit_DHT
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 
-
-
-# if (sys.version_info > (3, 0)):
-#    exec(open(APP_PATH + "/thermostat.conf").read())
-# else:
-#    execfile(APP_PATH + "/thermostat.conf")
 
 class thermostat:
 	
@@ -160,6 +155,61 @@ class thermostat:
 			db_file.write(json.dumps(self.__db, indent=4))
 		return
 
+def get():
+	t = thermostat()
+	tp,h=t.Current_Temperature_Humidity
+	s,st=t.Status
+	print(" ")
+	print("Temperature: " +str(tp) + "°F")
+	print("Humidity: " +str(h) + "%") 
+	print("Status: " + s + " " + str(st))
+	print(" ")
+	print ("Mode: " + str(t.Mode))
+	print ("Target Temperature: " + str(t.Target_Temperature) +  "°F")
+	print ("Schedule: " + str(t.Schedule))
+	print(" ")
+
+def set():
+	t=thermostat()
+	targetTemp=t.Target_Temperature
+	mode=t.Mode
+	schedule = None
+	a=sys.argv
+	i=2
+	while i < len(a):
+		if  a[i]=="-t" and a[i+1]!='':
+			targetTemp=a[i+1]
+			i+=2
+			continue
+		if a[i]=="-m" and a[i+1]!='':
+			mode=a[i+1]
+			i+=2
+			continue
+		if a[i]=="-s" and a[i+1]!='':
+			schedule=a[i+1]
+			i+=2
+			continue	
+		i+=1
+	t.Set(targetTemp,mode,schedule)
+	get()
+
+def proc():
+	t=thermostat()
+	t.Process()
+	
+
 if (__name__=="__main__"):
-	th = thermostat()
-	print (th.Status)
+	if (len(sys.argv)<=1):
+		get()
+	elif sys.argv[1]=="get":
+		get()
+	elif sys.argv[1]=="set":
+		set()
+	elif sys.argv[1]=="proc":
+		proc()
+	else:
+		get()
+
+		
+			
+

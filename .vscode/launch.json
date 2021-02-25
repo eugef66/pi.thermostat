@@ -22,12 +22,16 @@
 			"name": "Set",
 			"type": "python",
 			"request": "launch",
-			"program": "set.py",
+			"program": "thermostat.py",
 			"console": "integratedTerminal",
 			"args": [
-				"t=70",
-				"m=HEAT",
-				"s=2021-02-12 13:00"
+				"set",
+				"-t",
+				"70",
+				"-m",
+				"HEAT",
+				"-s",
+				"2021-02-12 13:00"
 			]
 		},
 		{
@@ -41,8 +45,9 @@
 			"name": "Process",
 			"type": "python",
 			"request": "launch",
-			"program": "proc.py",
-			"console": "integratedTerminal"
+			"program": "thermostat.py",
+			"console": "integratedTerminal",
+			"args": ["proc"]
 		},
 		{
 			"name": "Python: Current File",
