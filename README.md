@@ -16,8 +16,14 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
   - WiringPi (http://wiringpi.com/) - comes PRE-INSTALLED with standard Raspbian desktop system. 
              For "Raspbery OS Lite" install using "sudo apt install wiringpi"
   - RPi.GPIO Python module (https://pypi.org/project/RPi.GPIO/)
+  - Adafruit_DHT Python module (https://github.com/adafruit/Adafruit_Python_DHT) 
 
 3. Installation instructions
+
+ - Simple self-running (no Apache)
+ - 
+ - Advanced with Apache2 server 
+  
   1. set default state of pins at boot
       - sudo nano /etc/rc.local
       
