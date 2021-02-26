@@ -145,8 +145,11 @@
 									delta = datetime.timedelta(days=1)
 									while option_date <= end_date:
 										date_text = option_date.strftime("%a %b %d, %Y")
+									
+									#TODO: set selected based on date from db
+									selected = ""
 									%>
-									<option value="{{option_date}}">{{date_text}}</option>
+									<option value="{{option_date}}" {{selected}}>{{date_text}}</option>
 									<%	option_date += delta
 									end
 									%>
@@ -154,10 +157,11 @@
 								<select class="form-control input-lg" id="sch_time_h">
 									<% for i in range(0,24):
 										v = "0" + str(i)
-										v=v[-2:] 
+										v=v[-2:]
+										selected="selected" if i==12 else ""
 									%>
 
-									<option value='{{v}}'>{{v}}</option>
+									<option value='{{v}}' {{selected}}>{{v}}</option>
 									
 									% end
 								</select>:
@@ -178,12 +182,8 @@
                 
                 % if Current_Mode != "OFF":
 				<!-- Forth Row-->
-				<div class="row">
-                    <div class="col-xs-12">
-						<h4 class="text-center">Starts at {{Schedule}}</h4>
-					</div>
-				</div>
-                <!-- Fifth Row-->
+				
+                
                 <div class="row">
                     <div class="col-xs-12">
                     <% c="black"
@@ -214,6 +214,12 @@
                         </h1>
                     </div>
                 </div>
+				<!-- Fifth Row-->
+				<div class="row">
+                    <div class="col-xs-12">
+						<h4 class="text-center">starts at {{Schedule}}</h4>
+					</div>
+				</div>
                 % end
             </div>
         </div>
