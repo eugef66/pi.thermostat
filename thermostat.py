@@ -207,6 +207,8 @@ if (__name__=="__main__"):
 		set()
 	elif sys.argv[1]=="proc":
 		proc()
+	elif sys.argv[1]=="init":
+		t=thermostat()
 	else:
 		get()
 

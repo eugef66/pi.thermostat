@@ -13,10 +13,11 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
   - Raspbian OS
   - Apache2 
   - Python 2.7 (tested on 2.7.16, but should work with Python3)
-  - WiringPi (http://wiringpi.com/) - comes PRE-INSTALLED with standard Raspbian desktop system. 
-             For "Raspbery OS Lite" install using "sudo apt install wiringpi"
   - RPi.GPIO Python module (https://pypi.org/project/RPi.GPIO/)
   - Adafruit_DHT Python module (https://github.com/adafruit/Adafruit_Python_DHT) 
+  - (optional) WiringPi (http://wiringpi.com/) - comes PRE-INSTALLED with standard Raspbian desktop system. 
+             For "Raspbery OS Lite" install using "sudo apt install wiringpi"
+  
 
 ## 3. Installation instructions
 
