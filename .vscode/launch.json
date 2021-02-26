@@ -35,6 +35,17 @@
 			]
 		},
 		{
+			"name": "Gen Hash",
+			"type": "python",
+			"request": "launch",
+			"program": "auth.py",
+			"console": "integratedTerminal",
+			"args": [
+				"genhash",
+				"1111"
+			]
+		},
+		{
 			"name": "Get",
 			"type": "python",
 			"request": "launch",

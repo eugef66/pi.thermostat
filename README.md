@@ -20,7 +20,13 @@ Python and PHP code for Raspberri PI based web-enabled thermostat
 
 ## 3. Installation instructions
 
- ### cron job 
+ ### Gernerate pin code hash
+	python auth.py genhash "pin code"
+example: 
+	
+	python auth.py genhash 1111
+
+ ### Create cron job 
  	sudo crontab -e 
 add following command. Replace "app directory" with your working directory
 	

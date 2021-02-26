@@ -2,7 +2,7 @@ import uuid
 import hashlib
 import json
 import os
-
+import sys
 from  datetime import datetime, date
 from bottle import response, request, redirect
 
@@ -67,7 +67,23 @@ class auth_session:
 		self.save_session()
 		redirect(self.logout_redirect_url)
 		return 
-		
 
+def genhash(pin):
+	APP_PATH = os.path.dirname(os.path.abspath(__file__))
+	#print (pin)
+	pinhash = hashlib.sha256(pin.encode()).hexdigest()
+	print (pinhash)
+	s = 'PIN_CODE = "' + pinhash + '"'
+	with open(APP_PATH + "/auth_pin.py", "w+") as pin_code_file:
+		pin_code_file.write(s)
+
+if (__name__=="__main__"):
+	if (len(sys.argv)>2):
+		pin = sys.argv[2]
+		if (sys.argv[1]=='genhash' and pin!=''):
+			genhash(pin)
+	else:
+		print ("")
+		print ("use genhash <pin> to generate/mofigy pin hash")
 
 
