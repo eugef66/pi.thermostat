@@ -38,7 +38,7 @@ This installation allows you to run thermostat using included "bottle" web serve
 	sudo nano /etc/rc.local
 add following command before `exit(0)`
 
-	python "app directroy"/startup.py >> "app directory"/app.log 2>&1
+	python "app directroy"/web.py >> "app directory"/web.log 2>&1
  
  ### Advanced (with Apache2 server):
   

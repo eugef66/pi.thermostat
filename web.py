@@ -60,9 +60,10 @@ def css(filename):
 def css(filename):
 	return static_file(filename, root=APP_PATH + '/js')
 
-#print(__name__)
-def start():
+if __name__=='__main__':
+	abspath = os.path.abspath(__file__)
+	dname = os.path.dirname(abspath)
+	os.chdir(dname)
+	t=th.thermostat()
 	run(host='0.0.0.0', port=9988)
 
-if __name__=='__main__':
-	start()
