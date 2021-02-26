@@ -33,13 +33,24 @@
 
     function doSubmit(mode,isSchedule)
     {
-		schedule="";
-		if (isSchedule){
-			date_schedule = document.getElementById('date_schedule').value;
-			time_schedule = document.getElementById('time_schedule').value;
-			schedule = date_schedule + " " + time_schedule;
+		/*schedule:
+			null - reset
+			true - set
+			false - keep
+		*/
+
+		var schedule=document.getElementById('schedule').value;
+		if (isSchedule==null){
+			schedule="";
+		}
+		else if (isSchedule){
+			sch_date = document.getElementById('sch_date').value;
+			sch_time_h = document.getElementById('sch_time_h').value;
+			sch_time_m = document.getElementById('sch_time_m').value;
+			schedule = sch_date + " " + sch_time_h + ":" + sch_time_m;
 			//alert(schAction + " : " + schedule);
 		}
+		
         var mode = (mode==null ? document.getElementById('mode').value:mode);
         var targetTemp = document.getElementById('targetTemp');
         var temp = (targetTemp==null? document.getElementById('temp').value:targetTemp.value);
@@ -55,6 +66,8 @@
     <form id="form">
         <input type='hidden' value='{{Target_Temperature}}' name='temp' id='temp' />
         <input type='hidden' value='{{Current_Mode}}' name='mode' id='mode' />
+		<input type='hidden' value='{{Schedule}}' name='schedule' id='schedule' />
+
         <div class="jumbotron text-center">
             <div class="container">
                 <!-- First Row-->
@@ -81,13 +94,13 @@
 								dis='disabled=disabled'
 							end
 							%>
-							<button type="button" id="COOL" value="COOL" onClick="doSubmit('COOL')" class='btn btn-lg {{cl}}' {{dis}}>COOL</button>
+							<button type="button" id="COOL" value="COOL" onClick="doSubmit('COOL',null)" class='btn btn-lg {{cl}}' {{dis}}>COOL</button>
 							<button type="button" class="btn btn-lg {{cl}} " data-toggle="collapse" data-target="#collapseSchedule" aria-expanded="false" aria-controls="collapseExample" onclick='schAction="COOL"'>
 								<span class="caret"></span>
 								<span class="sr-only">Toggle Dropdown</span>
 							</button>
 						</div>
-                        <button type="button" id="OFF" value="OFF" onClick="doSubmit('OFF')"
+                        <button type="button" id="OFF" value="OFF" onClick="doSubmit('OFF',false)"
                             % if Current_Mode=='OFF': 
                                 class="btn btn-lg btn-warning active" disabled="disabled"
                             % else: 
@@ -102,7 +115,7 @@
 							dis='disabled=disabled'
 						end
 						%>
-						<button type="button"  id="HEAT" value="HEAT" onClick="doSubmit('HEAT')" class='{{cl}}'{{dis}}>HEAT</button>
+						<button type="button"  id="HEAT" value="HEAT" onClick="doSubmit('HEAT',null)" class='{{cl}}'{{dis}}>HEAT</button>
 						<button type="button" class="btn btn-lg {{cl}} " data-toggle="collapse" data-target="#collapseSchedule" aria-expanded="false" aria-controls="collapseExample" onclick='schAction="HEAT"'>
 							<span class="caret"></span>
 							<span class="sr-only">Toggle Dropdown</span>
@@ -116,7 +129,7 @@
 							dis='disabled=disabled'
 						end
 						%>
-                        <button type="button" id="AUTO" value="AUTO" onClick="doSubmit('AUTO')" class='{{cl}}'{{dis}} >AUTO</button>
+                        <button type="button" id="AUTO" value="AUTO" onClick="doSubmit('AUTO',null)" class='{{cl}}'{{dis}} >AUTO</button>
 						<button type="button" class="btn btn-lg {{cl}} " data-toggle="collapse" data-target="#collapseSchedule" aria-expanded="false" aria-controls="collapseExample" onclick='schAction="AUTO"'>
 							<span class="caret"></span>
 							<span class="sr-only">Toggle Dropdown</span>
@@ -125,7 +138,7 @@
 					<div class="collapse" id="collapseSchedule">
 						<div class="well">
 							<div class="form-inline">
-								<select class="form-control input-lg" id="date_schedule">
+								<select class="form-control input-lg" id="sch_date">
 									<% import datetime
 									option_date = datetime.date.today()
 									end_date = option_date + datetime.timedelta(days=30)
@@ -138,103 +151,37 @@
 									end
 									%>
 								</select>
-								<select class="form-control input-lg" id="time_schedule">
-									<option value='00:00'>00:00</option>
-									<option value='00:15'>00:15</option>
-									<option value='00:30'>00:30</option>
-									<option value='00:45'>00:45</option>
-									<option value='01:00'>01:00</option>
-									<option value='01:15'>01:15</option>
-									<option value='01:30'>01:30</option>
-									<option value='01:45'>01:45</option>
-									<option value='02:00'>02:00</option>
-									<option value='02:15'>02:15</option>
-									<option value='02:30'>02:30</option>
-									<option value='02:45'>02:45</option>
-									<option value='03:00'>03:00</option>
-									<option value='03:15'>03:15</option>
-									<option value='03:30'>03:30</option>
-									<option value='03:45'>03:45</option>
-									<option value='04:00'>04:00</option>
-									<option value='04:15'>04:15</option>
-									<option value='04:30'>04:30</option>
-									<option value='04:45'>04:45</option>
-									<option value='05:00'>05:00</option>
-									<option value='05:15'>05:15</option>
-									<option value='05:30'>05:30</option>
-									<option value='05:45'>05:45</option>
-									<option value='06:00'>06:00</option>
-									<option value='06:15'>06:15</option>
-									<option value='06:30'>06:30</option>
-									<option value='06:45'>06:45</option>
-									<option value='07:00'>07:00</option>
-									<option value='07:15'>07:15</option>
-									<option value='07:30'>07:30</option>
-									<option value='07:45'>07:45</option>
-									<option value='08:00'>08:00</option>
-									<option value='08:15'>08:15</option>
-									<option value='08:30'>08:30</option>
-									<option value='08:45'>08:45</option>
-									<option value='09:00'>09:00</option>
-									<option value='09:15'>09:15</option>
-									<option value='09:30'>09:30</option>
-									<option value='09:45'>09:45</option>
-									<option value='10:00'>10:00</option>
-									<option value='10:15'>10:15</option>
-									<option value='10:30'>10:30</option>
-									<option value='10:45'>10:45</option>
-									<option value='11:00'>11:00</option>
-									<option value='11:15'>11:15</option>
-									<option value='11:30'>11:30</option>
-									<option value='11:45'>11:45</option>
-									<option value='12:00'>12:00</option>
-									<option value='12:15'>12:15</option>
-									<option value='12:30'>12:30</option>
-									<option value='12:45'>12:45</option>
-									<option value='13:00'>13:00</option>
-									<option value='13:15'>13:15</option>
-									<option value='13:30'>13:30</option>
-									<option value='13:45'>13:45</option>
-									<option value='14:00'>14:00</option>
-									<option value='14:15'>14:15</option>
-									<option value='14:30'>14:30</option>
-									<option value='14:45'>14:45</option>
-									<option value='15:00'>15:00</option>
-									<option value='15:15'>15:15</option>
-									<option value='15:30'>15:30</option>
-									<option value='15:45'>15:45</option>
-									<option value='16:00'>16:00</option>
-									<option value='16:15'>16:15</option>
-									<option value='16:30'>16:30</option>
-									<option value='16:45'>16:45</option>
-									<option value='17:00'>17:00</option>
-									<option value='17:15'>17:15</option>
-									<option value='17:30'>17:30</option>
-									<option value='17:45'>17:45</option>
-									<option value='18:00'>18:00</option>
-									<option value='18:15'>18:15</option>
-									<option value='18:30'>18:30</option>
-									<option value='18:45'>18:45</option>
-									<option value='19:00'>19:00</option>
-									<option value='19:15'>19:15</option>
-									<option value='19:30'>19:30</option>
-									<option value='19:45'>19:45</option>
-									<option value='20:00'>20:00</option>
-									<option value='20:15'>20:15</option>
-									<option value='20:30'>20:30</option>
-									<option value='20:45'>20:45</option>
-									<option value='21:00'>21:00</option>
-									<option value='21:15'>21:15</option>
-									<option value='21:30'>21:30</option>
-									<option value='21:45'>21:45</option>
-									<option value='22:00'>22:00</option>
-									<option value='22:15'>22:15</option>
-									<option value='22:30'>22:30</option>
-									<option value='22:45'>22:45</option>
-									<option value='23:00'>23:00</option>
-									<option value='23:15'>23:15</option>
-									<option value='23:30'>23:30</option>
-									<option value='23:45'>23:45</option>
+								<select class="form-control input-lg" id="sch_time_h">
+									<option value='00'>00</option>
+									<option value='01'>01</option>
+									<option value='02'>02</option>
+									<option value='03'>03</option>
+									<option value='04'>04</option>
+									<option value='05'>05</option>
+									<option value='06'>06</option>
+									<option value='07'>07</option>
+									<option value='08'>08</option>
+									<option value='09'>09</option>
+									<option value='10'>10</option>
+									<option value='11'>11</option>
+									<option value='12' selected>12</option>
+									<option value='13'>13</option>
+									<option value='14'>14</option>
+									<option value='15'>15</option>
+									<option value='16'>16</option>
+									<option value='17'>17</option>
+									<option value='18'>18</option>
+									<option value='19'>19</option>
+									<option value='20'>20</option>
+									<option value='21'>21</option>
+									<option value='22'>22</option>
+									<option value='23'>23</option>
+								</select>:
+								<select class="form-control input-lg" id="sch_time_m">
+									<option value='00'>00</option>
+									<option value='15'>15</option>
+									<option value='30'>30</option>
+									<option value='45'>45</option>
 								</select>
 								<a class="btn btn-lg btn-default" href="javascript:doSubmit(schAction,true)">OK</a>
 							</div>
@@ -269,7 +216,7 @@
                             % else:
                             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
                             % end
-                            <select name="targetTemp" id="targetTemp"  onchange="doSubmit(null)">
+                            <select name="targetTemp" id="targetTemp"  onchange="doSubmit(null,false)">
                                 % for t in range(60,90):
                                     % if  Target_Temperature==t:
                                         <option selected>{{t}}</option>

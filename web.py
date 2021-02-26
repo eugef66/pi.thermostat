@@ -21,7 +21,6 @@ def index():
 def set(mode, temp):
 	if a.is_logged_in:
 		schedule = request.GET.get('sch')
-		print (len(schedule))
 		t=th.thermostat()
 		if (len(schedule)>15):
 			t.Set(temp,mode,schedule)
