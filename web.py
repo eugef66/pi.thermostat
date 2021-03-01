@@ -8,6 +8,7 @@ a=auth.auth_session()
 a.logout_redirect_url="/login"
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
+os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
 
 @route('/')
 def index():
