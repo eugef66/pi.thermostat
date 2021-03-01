@@ -137,8 +137,10 @@
                     </div>
 					<div class="collapse" id="collapseSchedule">
 						<div class="well">
-							<div class="form-inline">
-								<select class="form-control input-lg" id="sch_date">
+							<div class="row">
+							<div class="col-md-4"></div>	
+							<div class="col-xs-12 col-md-4">
+								<select class="form-control" id="sch_date">
 									<% import datetime
 									option_date = datetime.date.today()
 									end_date = option_date + datetime.timedelta(days=30)
@@ -154,7 +156,13 @@
 									end
 									%>
 								</select>
-								<select class="form-control input-lg" id="sch_time_h">
+							</div>
+							<div class="col-md-4"></div>
+							</div>
+							<div class="row">
+								<div class="col-md-4"></div>
+								<div class="col-xs-6 col-md-2 text-right">
+								<select class="form-control" id="sch_time_h">
 									<% for i in range(0,24):
 										v = "0" + str(i)
 										v=v[-2:]
@@ -164,8 +172,11 @@
 									<option value='{{v}}' {{selected}}>{{v}}</option>
 									
 									% end
-								</select>:
-								<select class="form-control input-lg" id="sch_time_m">
+								</select></div>
+								<div class="col-xs-6 col-md-2 text-left">
+								
+								
+								<select class="form-control" id="sch_time_m">
 									<% for i in range(0,46,15):
 										v="0" + str(i)
 										v=v[-2:]
@@ -173,7 +184,13 @@
 									<option value='{{v}}'>{{v}}</option>
 									% end
 								</select>
-								<a class="btn btn-lg btn-default" href="javascript:doSubmit(schAction,true)">OK</a>
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 col-md-12">
+								<a class="btn btn-md btn-default" href="javascript:doSubmit(schAction,true)">OK</a>
+								</div>
 							</div>
 						</div>
 					  </div>

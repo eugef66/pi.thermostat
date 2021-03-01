@@ -15,7 +15,13 @@ def index():
 		t=th.thermostat()
 		ct,ch = t.Current_Temperature_Humidity
 		s,st=t.Status
-		return template('index_template', Status=s, Current_Temperature=ct, Current_Humidity=ch, Color='blue',Target_Temperature=t.Target_Temperature, Current_Mode=t.Mode, Stage=st, Schedule=t.Schedule)
+		return template('index_template', Status=s
+										, Current_Temperature=ct
+										, Current_Humidity=ch
+										, Target_Temperature=t.Target_Temperature
+										, Current_Mode=t.Mode
+										, Stage=st
+										, Schedule=t.Schedule)
 
 @route('/set/<mode>/<temp>')
 def set(mode, temp):
