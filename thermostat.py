@@ -24,17 +24,16 @@ class thermostat:
 		GPIO.setwarnings(False)
 
 		GPIO.setup([config.HEAT_PIN, config.COOL_PIN], GPIO.OUT)
-		GPIO.output([config.HEAT_PIN, config.COOL_PIN], GPIO.HIGH)
+
 
 		if (config.HEAT_TWO_STAGE):
 			GPIO.setup([config.HEAT_STAGE_2_PIN], GPIO.OUT)
-			GPIO.output([config.HEAT_STAGE_2_PIN], GPIO.HIGH)
+
 		if (config.COOL_TWO_STAGE):
 			GPIO.setup([config.COOL_STAGE_2_PIN], GPIO.OUT)
-			GPIO.output([config.COOL_STAGE_2_PIN], GPIO.HIGH)
+
 
 		self.__load_db()
-		self.Process()
 
 		return
 
@@ -143,6 +142,14 @@ class thermostat:
 				return "OFF"
 			GPIO.cleanup()
 
+	def Reset(self):
+		GPIO.output([config.HEAT_PIN, config.COOL_PIN], GPIO.HIGH)
+		if (config.HEAT_TWO_STAGE):
+			GPIO.output([config.HEAT_STAGE_2_PIN], GPIO.HIGH)
+
+		if (config.COOL_TWO_STAGE):
+			GPIO.output([config.COOL_STAGE_2_PIN], GPIO.HIGH)
+
 	def __load_db(self):
 		if (os.path.exists(APP_PATH + "/db.json")):
 			with open(APP_PATH + '/db.json', 'r') as db_file:
@@ -211,8 +218,9 @@ if (__name__=="__main__"):
 		set()
 	elif sys.argv[1]=="proc":
 		proc()
-	elif sys.argv[1]=="init":
+	elif sys.argv[1]=="reset":
 		t=thermostat()
+		t.Reset()
 	else:
 		get()
 
