@@ -23,6 +23,15 @@ class thermostat:
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setwarnings(False)
 
+		GPIO.setup([config.HEAT_PIN, config.COOL_PIN], GPIO.OUT)
+
+		if (config.HEAT_TWO_STAGE):
+			GPIO.setup([config.HEAT_STAGE_2_PIN], GPIO.OUT)
+			
+		if (config.COOL_TWO_STAGE):
+			GPIO.setup([config.COOL_STAGE_2_PIN], GPIO.OUT)
+
+
 		
 
 
@@ -137,15 +146,13 @@ class thermostat:
 
 	def Initialize(self):
 		#Initialize GPIO Hardware
-		GPIO.setup([config.HEAT_PIN, config.COOL_PIN], GPIO.OUT)
+		
 		GPIO.output([config.HEAT_PIN, config.COOL_PIN], GPIO.HIGH)
 
 		if (config.HEAT_TWO_STAGE):
-			GPIO.setup([config.HEAT_STAGE_2_PIN], GPIO.OUT)
 			GPIO.output([config.HEAT_STAGE_2_PIN], GPIO.HIGH)
 
 		if (config.COOL_TWO_STAGE):
-			GPIO.setup([config.COOL_STAGE_2_PIN], GPIO.OUT)
 			GPIO.output([config.COOL_STAGE_2_PIN], GPIO.HIGH)
 		print ("GPIO Initialized")
 			
