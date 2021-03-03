@@ -35,23 +35,25 @@ add following command. Replace "app directory" with your working directory
  
  ### Simple self-running (no Apache):
 This installation allows you to run thermostat using included "bottle" web server and doesn't require Apache, Lighttpd or other web servers installed. It is single-threaded and slow, but a good choice for a simple and quick setup if light use is excpected. 
+#### 1. Initialize GPIO on startup
 
 	sudo nano /etc/rc.local
+
 add following command before `exit(0)`
 
 	python "app directroy"/web.py >> "app directory"/web.log 2>&1
  
  ### Advanced (with Apache2 server):
-  
-  1. set default state of pins at boot
-      - sudo nano /etc/rc.local
+This installation allows you to run thermostat Apache, Lighttpd or other web servers which supports WSGI. 
+#### 1. Initialize GPIO on startup
+
+	sudo nano /etc/rc.local
+
+add following command before `exit(0)`
+
+	python "app directroy"/thermostat.py init >> "app directory"/thermostat.log 2>&1
       
-            gpio -g write 2 1
-            gpio -g write 3 1
-            gpio -g write 17 1
-            gpio -g mode 2 OUT
-            gpio -g mode 3 OUT
-            gpio -g mode 17 OUT
+    
             
  
 
