@@ -2,8 +2,13 @@ import os, sys
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 
-sys.path = APP_PATH + '/' + sys.path
+print (APP_PATH)
+print (sys.path)
+
+sys.path.append(APP_PATH)
 os.chdir(os.path.dirname(__file__))
+
+print (sys.path)
 
 import bottle
 import web
