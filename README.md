@@ -52,7 +52,47 @@ This installation allows you to run thermostat Apache, Lighttpd or other web ser
 add following command before `exit(0)`
 
 	python "app directroy"/thermostat.py init >> "app directory"/thermostat.log 2>&1
-      
+
+Also, make sure user that Apache is running as (usualy www-data) is added to gpio group
+
+	sudo usermod -aG gpio www-data 
+
+
+#### 2. Configure WSGI on Apache2 sevrer
+Install WSGI module for Apcahe2
+
+	 sudo apt install libapache2-mod-wsgi
+
+Make sure it is enabled
+
+	sudo a2enmod wsgi
+
+#### 3. Configure Apache2 
+Create thermostat.conf file at /etc/apache2/sites-available and add following configuration (repalce application path and port to the one you use)
+
+	<VirtualHost *:81>
+        ServerName pi.thermostat.rpi3b.local
+        ServerAdmin admin@localhost
+
+        DocumentRoot /home/pi/apps/pi.thermostat
+        ErrorLog /home/pi/apps/apache_error_81.log
+        CustomLog /home/pi/apps/apache_access_81.log combined
+
+        WSGIDaemonProcess pi.thermostat user=www-data group=www-data processes=1 threads=5
+        WSGIScriptAlias / /home/pi/apps/pi.thermostat/app.wsgi
+
+		<Directory /home/pi/apps/pi.thermostat>
+			WSGIProcessGroup pi.thermostat
+			WSGIApplicationGroup %{GLOBAL}
+			Order deny,allow
+			Allow from all
+			Options Indexes FollowSymLinks
+			AllowOverride All
+			Require all granted
+		</Directory>
+	</VirtualHost>
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+
     
             
  
