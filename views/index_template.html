@@ -70,20 +70,20 @@
 
         <div class="jumbotron text-center">
             <div class="container">
-                <!-- First Row-->
+                <!-- First Row - Temp and Hum Display -->
                 <div class="row">
                     <div class="col-xs-12">
                         <font color='green'><h1>{{Current_Temperature}}&deg;F </h1></font>
                         <font color='green'><h3><span class="glyphicon glyphicon-tint" aria-hidden="true"></span>{{Current_Humidity}}%</h3></font>
                     </div>
                 </div>
-                <!--Second Row-->
+                <!--Second Row - Empty -->
                 <div class="row">
                     <div class="col-xs-12">
                         &nbsp;
                     </div>
                 </div>
-                <!-- Third Row-->
+                <!-- Third Row - Buttons -->
                 <div class="row">
                     <div class="col-xs-12">
 						<div class="btn-group">
@@ -135,70 +135,100 @@
 							<span class="sr-only">Toggle Dropdown</span>
 						</button>
                     </div>
-					<div class="collapse" id="collapseSchedule">
-						<div class="well">
-							<div class="row">
-							<div class="col-md-4"></div>	
-							<div class="col-xs-12 col-md-4">
-								<select class="form-control" id="sch_date">
-									<% import datetime
-									option_date = datetime.date.today()
-									end_date = option_date + datetime.timedelta(days=30)
-									delta = datetime.timedelta(days=1)
-									while option_date <= end_date:
-										date_text = option_date.strftime("%a %b %d, %Y")
-									
-									#TODO: set selected based on date from db
-									selected = ""
-									%>
-									<option value="{{option_date}}" {{selected}}>{{date_text}}</option>
-									<%	option_date += delta
-									end
-									%>
-								</select>
-							</div>
-							<div class="col-md-4"></div>
-							</div>
-							<div class="row">
-								<div class="col-md-4"></div>
-								<div class="col-xs-6 col-md-2 text-right">
-								<select class="form-control" id="sch_time_h">
-									<% for i in range(0,24):
-										v = "0" + str(i)
-										v=v[-2:]
-										selected="selected" if i==12 else ""
-									%>
-
-									<option value='{{v}}' {{selected}}>{{v}}</option>
-									
-									% end
-								</select></div>
-								<div class="col-xs-6 col-md-2 text-left">
-								
-								
-								<select class="form-control" id="sch_time_m">
-									<% for i in range(0,46,15):
-										v="0" + str(i)
-										v=v[-2:]
-									%>
-									<option value='{{v}}'>{{v}}</option>
-									% end
-								</select>
-								</div>
-								<div class="col-md-4"></div>
-							</div>
-							<div class="row">
-								<div class="col-xs-12 col-md-12">
-								<a class="btn btn-md btn-default" href="javascript:doSubmit(schAction,true)">OK</a>
-								</div>
-							</div>
-						</div>
-					  </div>
+					
 					</div>
                 </div>
-                
+				<!-- Forth row - schedule controls -->
+                <div class="row">
+					<div class="col-md-12">
+						<div class="collapse" id="collapseSchedule">
+							<div class="well">
+<!--
+								<div class="row">
+									<div class="col-xs-3">
+										Date
+								</div>
+									<div class="col-xs-3">
+										Hour
+									</div>
+									<div class="col-xs-3">
+										Minutes
+									</div>
+									<div class="col-xs-3">AM</div>
+								</div>
+-->
+								<div class="row">
+								<div class="col-md-4"></div>	
+								<div class="col-xs-12 col-md-4">
+									<select class="form-control" id="sch_date">
+										<% import datetime
+										option_date = datetime.date.today()
+										end_date = option_date + datetime.timedelta(days=30)
+										delta = datetime.timedelta(days=1)
+										while option_date <= end_date:
+											date_text = option_date.strftime("%a %b %d, %Y")
+										
+										#TODO: set selected based on date from db
+										selected = ""
+										%>
+										<option value="{{option_date}}" {{selected}}>{{date_text}}</option>
+										<%	option_date += delta
+										end
+										%>
+									</select>
+								</div>
+								<div class="col-md-4"></div>
+								</div>
+								<div class="row">
+									<div class="col-md-4"></div>
+									<div class="col-xs-6 col-md-2 text-right">
+									<select class="form-control" id="sch_time_h">
+										<% for i in range(0,24):
+											v=("0" + str(i))[-2:]
+											t=""
+	
+											if (i<12) :
+												t = ("0" + str(i))[-2:] + " AM" 
+											elif (i==12):
+												t = str(i) + " PM"
+											else:
+												t = str(i-12) + " PM" 
+											end
+											selected="selected" if i==12 else ""
+										%>
+	
+										<option value='{{v}}' {{selected}}>{{t}}</option>
+										
+										% end
+									</select></div>
+									<div class="col-xs-6 col-md-2 text-left">
+									
+									
+									<select class="form-control" id="sch_time_m">
+										<% for i in range(0,46,15):
+											v="0" + str(i)
+											v=v[-2:]
+										%>
+										<option value='{{v}}'>{{v}}</option>
+										% end
+									</select>
+									</div>
+									<div class="col-md-4"></div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12 col-md-12">
+									<a class="btn btn-md btn-default" href="javascript:doSubmit(schAction,true)">OK</a>
+									</div>
+								</div>
+							</div>
+						  </div>
+					</div>
+
+				</div>
+
+
                 % if Current_Mode != "OFF":
-				<!-- Forth Row-->
+				<!-- Fifth Row - Temp drop-down -->
 				
                 
                 <div class="row">
@@ -231,7 +261,7 @@
                         </h1>
                     </div>
                 </div>
-				<!-- Fifth Row-->
+				<!-- Sixs Row - schedule -->
 				<div class="row">
                     <div class="col-xs-12">
 						<h4 class="text-center">starts at {{Schedule}}</h4>
