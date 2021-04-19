@@ -33,7 +33,7 @@ add following command. Replace "app directory" with your working directory
 	
 	* * * * * python "app directory"/proc.py >> "app directory"/proc.log 2>&1
  
- ### Simple self-running (no Apache):
+ ### Standalone:
 This installation allows you to run thermostat using included "bottle" web server and doesn't require Apache, Lighttpd or other web servers installed. It is single-threaded and slow, but a good choice for a simple and quick setup if light use is excpected. 
 #### 1. Initialize GPIO on startup
 
@@ -44,7 +44,7 @@ add following command before `exit(0)`
 	python "app directroy"/web.py >> "app directory"/web.log 2>&1
  
  ### Advanced (with Apache2 server):
-This installation allows you to run thermostat Apache, Lighttpd or other web servers which supports WSGI. 
+This installation allows you to run thermostat with Apache, Lighttpd or other web servers which supports WSGI. 
 #### 1. Initialize GPIO on startup
 
 	sudo nano /etc/rc.local
@@ -63,7 +63,7 @@ Install WSGI module for Apcahe2
 
 	 sudo apt install libapache2-mod-wsgi
 
-Make sure it is enabled
+Make sure WSGI mode is enabled
 
 	sudo a2enmod wsgi
 
@@ -93,6 +93,9 @@ Create thermostat.conf file at /etc/apache2/sites-available and add following co
 	</VirtualHost>
 
 
+Enable thermostat web site
+
+	sudo a2ensite thermostat
     
             
  
