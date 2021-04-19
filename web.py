@@ -72,5 +72,5 @@ if __name__=='__main__':
 	os.chdir(dname)
 	t=th.thermostat()
 	t.Initialize()
-	run(host='0.0.0.0', port=9988)
+	run(host='0.0.0.0', port=81)
 
