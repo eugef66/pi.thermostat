@@ -51,7 +51,7 @@ This installation allows you to run thermostat with Apache, Lighttpd or other we
 
 add following command before `exit(0)`
 
-	python "app directroy"/thermostat.py init >> "app directory"/thermostat.log 2>&1
+	python <APP DIRECTORY>/thermostat.py init >> <APP DIRECTORY>/thermostat.log 2>&1
 
 Also, make sure user that Apache is running as (usualy www-data) is added to gpio group
 

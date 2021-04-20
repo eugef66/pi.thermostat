@@ -10,22 +10,25 @@ a.logout_redirect_url="/login"
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
 
-__api_response={}
+
 
 
 @route('/')
 def index():
 	if a.is_logged_in:
+		_api_response={}
 		t=th.thermostat()
 		ct,ch = t.Current_Temperature_Humidity
 		s,st=t.Status
-		return template('front/index_template.html', Status=s
-										, Current_Temperature=ct
-										, Current_Humidity=ch
-										, Target_Temperature=t.Target_Temperature
-										, Current_Mode=t.Mode
-										, Stage=st
-										, Schedule=t.Schedule)
+
+		_api_response["Status"]=s
+		_api_response["Current_Temperature"]=ct
+		_api_response["Current_Humidity"]=ch
+		_api_response["Target_Temperature"]=t.Target_Temperature
+		_api_response["Current_Mode"]=t.Mode
+		_api_response["Stage"]=st
+		_api_response["Schedule"]=t.Schedule
+		return _api_response
 
 @route('/set/<mode>/<temp>')
 def set(mode, temp):

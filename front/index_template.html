@@ -1,0 +1,253 @@
+﻿
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>Home Thermostat</title>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <link rel="apple-touch-icon" sizes="57x57" href="/images/apple-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/images/apple-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/images/apple-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/images/apple-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/images/apple-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/images/apple-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/images/apple-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/apple-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-icon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/android-icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png" />
+    <link rel="manifest" href="/images/manifest.json" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-TileImage" content="/images/ms-icon-144x144.png" />
+    <meta name="theme-color" content="#ffffff" />
+    
+    
+    
+</head>
+<body>
+
+    <form id="form">
+        <input type='hidden' value='{{Target_Temperature}}' name='temp' id='temp' />
+        <input type='hidden' value='{{Current_Mode}}' name='mode' id='mode' />
+		<input type='hidden' value='{{Schedule}}' name='schedule' id='schedule' />
+
+        <div class="jumbotron text-center">
+            <div class="container">
+                <!-- First Row - Temp and Hum Display -->
+                <div class="row">
+                    <div class="col-xs-12">
+                        <font color='green'><h1>{{Current_Temperature}}&deg;F </h1></font>
+                        <font color='green'><h3><span class="glyphicon glyphicon-tint" aria-hidden="true"></span>{{Current_Humidity}}%</h3></font>
+                    </div>
+                </div>
+                <!--Second Row - Empty -->
+                <div class="row">
+                    <div class="col-xs-12">
+                        &nbsp;
+                    </div>
+                </div>
+                <!-- Third Row - Buttons -->
+                <div class="row">
+                    <div class="col-xs-12">
+						<div class="btn-group">
+							<%	cl='btn-default'
+								dis=''
+							if Current_Mode=='COOL':
+								cl='btn-primary active' 
+								dis='disabled=disabled'
+							end
+							%>
+							<button type="button" id="COOL" value="COOL" onClick="doSubmit('COOL',null)" class='btn btn-lg {{cl}}' {{dis}}>COOL</button>
+							<button type="button" class="btn btn-lg {{cl}} " data-toggle="collapse" data-target="#collapseSchedule" aria-expanded="false" aria-controls="collapseExample" onclick='schAction="COOL"'>
+								<span class="caret"></span>
+								<span class="sr-only">Toggle Dropdown</span>
+							</button>
+						</div>
+                        <button type="button" id="OFF" value="OFF" onClick="doSubmit('OFF',false)"
+                            % if Current_Mode=='OFF': 
+                                class="btn btn-lg btn-warning active" disabled="disabled"
+                            % else: 
+                                class="btn btn-lg btn-default"
+                            %end 
+                            >&nbsp;OFF&nbsp;</button>
+						<div class="btn-group">
+						<%	cl='btn btn-lg btn-default'
+							dis=''
+						if Current_Mode=='HEAT':
+							cl='btn btn-lg btn-danger active' 
+							dis='disabled=disabled'
+						end
+						%>
+						<button type="button"  id="HEAT" value="HEAT" onClick="doSubmit('HEAT',null)" class='{{cl}}'{{dis}}>HEAT</button>
+						<button type="button" class="btn btn-lg {{cl}} " data-toggle="collapse" data-target="#collapseSchedule" aria-expanded="false" aria-controls="collapseExample" onclick='schAction="HEAT"'>
+							<span class="caret"></span>
+							<span class="sr-only">Toggle Dropdown</span>
+						</button>
+						</div>
+						<div class="btn-group">
+						<%	cl='btn btn-lg btn-default'
+							dis=''
+						if Current_Mode=='AUTO':
+							cl='btn btn-lg btn-success active' 
+							dis='disabled=disabled'
+						end
+						%>
+                        <button type="button" id="AUTO" value="AUTO" onClick="doSubmit('AUTO',null)" class='{{cl}}'{{dis}} >AUTO</button>
+						<button type="button" class="btn btn-lg {{cl}} " data-toggle="collapse" data-target="#collapseSchedule" aria-expanded="false" aria-controls="collapseExample" onclick='schAction="AUTO"'>
+							<span class="caret"></span>
+							<span class="sr-only">Toggle Dropdown</span>
+						</button>
+                    </div>
+					
+					</div>
+                </div>
+				<!-- Forth row - schedule controls -->
+                <div class="row">
+					<div class="col-md-12">
+						<div class="collapse" id="collapseSchedule">
+							<div class="well">
+<!--
+								<div class="row">
+									<div class="col-xs-3">
+										Date
+								</div>
+									<div class="col-xs-3">
+										Hour
+									</div>
+									<div class="col-xs-3">
+										Minutes
+									</div>
+									<div class="col-xs-3">AM</div>
+								</div>
+-->
+								<div class="row">
+								<div class="col-md-4"></div>	
+								<div class="col-xs-12 col-md-4">
+									<select class="form-control" id="sch_date">
+										<% import datetime
+										option_date = datetime.date.today()
+										end_date = option_date + datetime.timedelta(days=30)
+										delta = datetime.timedelta(days=1)
+										while option_date <= end_date:
+											date_text = option_date.strftime("%a %b %d, %Y")
+										
+										#TODO: set selected based on date from db
+										selected = ""
+										%>
+										<option value="{{option_date}}" {{selected}}>{{date_text}}</option>
+										<%	option_date += delta
+										end
+										%>
+									</select>
+								</div>
+								<div class="col-md-4"></div>
+								</div>
+								<div class="row">
+									<div class="col-md-4"></div>
+									<div class="col-xs-6 col-md-2 text-right">
+									<select class="form-control" id="sch_time_h">
+										<% for i in range(0,24):
+											v=("0" + str(i))[-2:]
+											t=""
+	
+											if (i<12) :
+												t = ("0" + str(i))[-2:] + " AM" 
+											elif (i==12):
+												t = str(i) + " PM"
+											else:
+												t = str(i-12) + " PM" 
+											end
+											selected="selected" if i==12 else ""
+										%>
+	
+										<option value='{{v}}' {{selected}}>{{t}}</option>
+										
+										% end
+									</select></div>
+									<div class="col-xs-6 col-md-2 text-left">
+									
+									
+									<select class="form-control" id="sch_time_m">
+										<% for i in range(0,46,15):
+											v="0" + str(i)
+											v=v[-2:]
+										%>
+										<option value='{{v}}'>{{v}}</option>
+										% end
+									</select>
+									</div>
+									<div class="col-md-4"></div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12 col-md-12">
+									<a class="btn btn-md btn-default" href="javascript:doSubmit(schAction,true)">OK</a>
+									</div>
+								</div>
+							</div>
+						  </div>
+					</div>
+
+				</div>
+
+
+                % if Current_Mode != "OFF":
+				<!-- Fifth Row - Temp drop-down -->
+				
+                
+                <div class="row">
+                    <div class="col-xs-12">
+                    <% c="black"
+                    if Status=='HEAT': 
+                        c="red" 
+                    elif Status=='COOL':
+                        c="blue"  
+                     end
+                     %>
+    
+                        <h1 style="color:{{c}}"> 
+                            % if Status=='HEAT':
+                            <span class="glyphicon glyphicon-fire"  aria-hidden="true"></span><small style="color: {{c}};">{{Stage}}</small>
+                            % elif Status=='COOL':
+                            <span class="glyphicon glyphicon-asterisk"  aria-hidden="true"></span><small style="color: {{c}};">{{Stage}}</small>
+                            % else:
+                            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                            % end
+                            <select name="targetTemp" id="targetTemp"  onchange="doSubmit(null,false)">
+                                % for t in range(60,90):
+                                    % if  Target_Temperature==t:
+                                        <option selected>{{t}}</option>
+                                    % else:
+                                        <option>{{t}}</option>
+                                    % end
+                                % end
+                            </select>&deg;F
+                        </h1>
+                    </div>
+                </div>
+				<!-- Sixs Row - schedule -->
+				<div class="row">
+                    <div class="col-xs-12">
+						<h4 class="text-center">starts at {{Schedule}}</h4>
+					</div>
+				</div>
+                % end
+            </div>
+        </div>
+    </form>
+
+
+
+
+
+	<script src="/js/index.js"></script>
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</body>
+</html>
