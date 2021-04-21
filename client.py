@@ -1,38 +1,38 @@
 import os
 from bottle import route, run, template, static_file, redirect, request
-import thermostat as th
-import auth #import auth_session
+from server import get, login, set, validate_login
 
 
-a=auth.auth_session()
-a.logout_redirect_url="/login"
+__logout_redirect_url="/login"
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
 
+def check_login():
+	if (s.validate_login()):
+		return True
+	else:
+		return template('login_template')
 
 
 
 @route('/')
 def index():
-	if a.is_logged_in:
-		_api_response={}
+	if check_login():
 		t=th.thermostat()
 		ct,ch = t.Current_Temperature_Humidity
 		s,st=t.Status
-
-		_api_response["Status"]=s
-		_api_response["Current_Temperature"]=ct
-		_api_response["Current_Humidity"]=ch
-		_api_response["Target_Temperature"]=t.Target_Temperature
-		_api_response["Current_Mode"]=t.Mode
-		_api_response["Stage"]=st
-		_api_response["Schedule"]=t.Schedule
-		return _api_response
+		return template('index_template', Status=s
+										, Current_Temperature=ct
+										, Current_Humidity=ch
+										, Target_Temperature=t.Target_Temperature
+										, Current_Mode=t.Mode
+										, Stage=st
+										, Schedule=t.Schedule)
 
 @route('/set/<mode>/<temp>')
 def set(mode, temp):
-	if a.is_logged_in:
+	if check_login():
 		schedule = request.GET.get('sch')
 		t=th.thermostat()
 		if (len(schedule)>15):
@@ -48,7 +48,7 @@ def login():
 @route('/login', method='POST')
 def do_login():
 	pin = request.forms.get('pin')
-	if a.login(pin):
+	if s.login():
 		redirect ('/')
 	else: 
 		return template('front/login_template.html', Message='Login incorrect')

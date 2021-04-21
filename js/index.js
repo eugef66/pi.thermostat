@@ -1,5 +1,11 @@
 schAction = "OFF";
 
+
+function load(){
+	alert ("load");
+
+}
+
 function doSubmit(mode, isSchedule) {
 	/*schedule:
 		null - reset
