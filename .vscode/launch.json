@@ -5,10 +5,17 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Web",
+			"name": "Web Client",
 			"type": "python",
 			"request": "launch",
-			"program": "web.py",
+			"program": "client.py",
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "Web Server",
+			"type": "python",
+			"request": "launch",
+			"program": "server.py",
 			"console": "integratedTerminal"
 		},
 		{

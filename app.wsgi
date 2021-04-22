@@ -6,7 +6,7 @@ sys.path.append(APP_PATH)
 os.chdir(os.path.dirname(__file__))
 
 import bottle
-import web
+import client
 application=bottle.default_app()
 
 

@@ -14,7 +14,6 @@ class auth_session:
 	
 	session_timeout = 20
 	__session_data={}
-	logout_redirect_url="/login"
 	
 	def __init__(self, **kwarg):
 		self.save_session()
@@ -49,7 +48,6 @@ class auth_session:
 		try:
 			session_date = self.__session_data[sid]
 		except KeyError:
-			#redirect(self.logout_redirect_url)
 			return False
 		dt= datetime.strptime(session_date,'%Y-%m-%d %H:%M:%S.%f')
 		if dt:
@@ -65,7 +63,6 @@ class auth_session:
 		sid = request.get_cookie("sid")
 		del self.__session_data[sid]
 		self.save_session()
-		#redirect(self.logout_redirect_url)
 		return 
 
 def genhash(pin):

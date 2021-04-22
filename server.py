@@ -6,10 +6,15 @@ import json
 
 
 a=auth.auth_session()
-a.logout_redirect_url="/login"
+
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
+
+
+def initialize():
+	t=th.thermostat()
+	t.Initialize()
 
 
 
@@ -23,7 +28,7 @@ def get():
 			t=th.thermostat()
 			ct,ch = t.Current_Temperature_Humidity
 			s,st=t.Status
-			_api_response["Status"]="OK"
+			_api_response["Status"]=True
 			_api_response["Current_State"]=s
 			_api_response["Current_Temperature"]=ct
 			_api_response["Current_Humidity"]=ch
@@ -32,10 +37,10 @@ def get():
 			_api_response["Stage"]=st
 			_api_response["Schedule"]=t.Schedule
 		except Exception as e:
-			_api_response["Status"] = "Error"
+			_api_response["Status"]=False
 			_api_response["Error"] = e.args
 	else:
-		_api_response["Status"] = "Error"
+		_api_response["Status"]=False
 		_api_response["Error"] = "Invalid Login"
 	return _api_response
 
@@ -51,15 +56,16 @@ def set(mode, temp):
 				t.Set(temp,mode,schedule)
 			else:
 				t.Set(temp,mode)
-			_api_response["Status"]="OK"
+			_api_response["Status"]=True
 		except Exception as e:
-			_api_response["Status"] = "Error"
+			_api_response["Status"]=False
 			_api_response["Error"] = e.args
+			return _api_response
 
 	else:
-		_api_response["Status"] = "Error"
+		_api_response["Status"]=False
 		_api_response["Error"] = "Invalid Login"
-	return _api_response
+		return _api_response
 
 
 @route('/login', method='POST')
@@ -68,24 +74,22 @@ def login(pin = None):
 	try:
 		if (pin == None):
 			pin = request.forms.get('pin')
-		print ("pin:" + pin)
-		if a.login(pin):
-			_api_response["Status"]="OK"
-		else: 
-			_api_response["Status"] = "Error"
+		if (a.login(pin)):
+			_api_response["Status"]=True
+		else:
+			_api_response["Status"]=False
 			_api_response["Error"] = "Invalid Login"
 	except Exception as e:
-		_api_response["Status"] = "Error"
+		_api_response["Status"]=False
 		_api_response["Error"] = e.args
-	finally:
-		return _api_response
+	return _api_response
+	
+		
 
 @route('/login/validate')
 def validate_login():
-	if a.is_logged_in:
-		return {"Status":"OK"}
-	else:
-		return {"Status": "ERROR"}
+	return a.is_logged_in
+		
 
 
 if __name__=='__main__':

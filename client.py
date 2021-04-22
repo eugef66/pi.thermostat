@@ -1,6 +1,6 @@
 import os
 from bottle import route, run, template, static_file, redirect, request
-from server import get, login, set, validate_login
+import server  as s
 
 
 __logout_redirect_url="/login"
@@ -12,71 +12,74 @@ def check_login():
 	if (s.validate_login()):
 		return True
 	else:
-		return template('login_template')
+		redirect (__logout_redirect_url)
+		return False
 
 
 
 @route('/')
 def index():
 	if check_login():
-		t=th.thermostat()
-		ct,ch = t.Current_Temperature_Humidity
-		s,st=t.Status
-		return template('index_template', Status=s
-										, Current_Temperature=ct
-										, Current_Humidity=ch
-										, Target_Temperature=t.Target_Temperature
-										, Current_Mode=t.Mode
-										, Stage=st
-										, Schedule=t.Schedule)
+		_response = s.get()
+		
+		print (_response)
+		if (_response["Status"]):
+
+			return template('index_template', Status=_response["Current_State"]
+											, Current_Temperature=_response["Current_Temperature"]
+											, Current_Humidity=_response["Current_Humidity"]
+											, Target_Temperature=_response["Target_Temperature"]
+											, Current_Mode=_response["Current_Mode"]
+											, Stage=_response["Stage"]
+											, Schedule=_response["Schedule"])
+		else:
+			return("error_template")
 
 @route('/set/<mode>/<temp>')
 def set(mode, temp):
 	if check_login():
 		schedule = request.GET.get('sch')
-		t=th.thermostat()
 		if (len(schedule)>15):
-			t.Set(temp,mode,schedule)
+			s.set(mode,temp, schedule)
 		else:
-			t.Set(temp,mode)
+			s.set(mode,temp)
 		return redirect('/')
 
 @route('/login')
 def login():
-	return template('front/login_template.html',Message=None)
+	return template('login_template',Message=None)
 
 @route('/login', method='POST')
 def do_login():
 	pin = request.forms.get('pin')
-	if s.login():
+	if s.login(pin)["Status"]:
 		redirect ('/')
 	else: 
-		return template('front/login_template.html', Message='Login incorrect')
+		return template('login_template', Message='Login incorrect')
 
 
 
 # static files
 @route('/images/<filename>')
 def images(filename):
-	return static_file(filename, root= APP_PATH + '/front/images')
+	return static_file(filename, root= APP_PATH + '/images')
 
 @route('/css/<filename>')
 def css(filename):
-	return static_file(filename, root=APP_PATH + '/front/css')
+	return static_file(filename, root=APP_PATH + '/css')
 
 @route('/fonts/<filename>')
 def css(filename):
-	return static_file(filename, root=APP_PATH + '/front/fonts')
+	return static_file(filename, root=APP_PATH + '/fonts')
 
 @route('/js/<filename>')
 def css(filename):
-	return static_file(filename, root=APP_PATH + '/front/js')
+	return static_file(filename, root=APP_PATH + '/js')
 
 if __name__=='__main__':
 	abspath = os.path.abspath(__file__)
 	dname = os.path.dirname(abspath)
 	os.chdir(dname)
-	t=th.thermostat()
-	t.Initialize()
+	s.initialize()
 	run(host='0.0.0.0', port=81)
 
