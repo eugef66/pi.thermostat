@@ -1,5 +1,8 @@
 # pi.thermostat
-Python and PHP code for Raspberri PI based web-enabled thermostat
+Python and PHP code for Raspberri PI based web-enabled thermostat. 
+ - Can run in standalone mode using bottle python web framework. 
+ - Standalone server-only mode to provide API for third-party clients (web, app, IoTs, etc)
+ - Can be deployed on more robust web server such as Apache, Lighttpd or other web servers which supports WSGI. Can be deployed with UI or in sevrer-only mode.
 
 ## 1. Hardware 
 
@@ -34,16 +37,22 @@ add following command. Replace "app directory" with your working directory
 	* * * * * python "app directory"/proc.py >> "app directory"/proc.log 2>&1
  
  ### Standalone:
-This installation allows you to run thermostat using included "bottle" web server and doesn't require Apache, Lighttpd or other web servers installed. It is single-threaded and slow, but a good choice for a simple and quick setup if light use is excpected. 
+ This installation allows you to run thermostat using included "bottle" web server and doesn't require Apache, Lighttpd or other web servers installed. It is single-threaded and slow, but a good choice for a simple and quick setup if light use is excpected. 
+
 #### 1. Initialize GPIO on startup
 
 	sudo nano /etc/rc.local
 
+##### with UI 
 add following command before `exit(0)`
 
-	python "app directroy"/web.py >> "app directory"/web.log 2>&1
+	python "app directroy"/client.py >> <app directory>/web.log 2>&1
+
+##### standalone SERVER-ONLY 
+	
+	python "app directroy"/server.py >> <app directory>/web.log 2>&1
  
- ### Advanced (with Apache2 server):
+### Advanced (with Apache2 server):
 This installation allows you to run thermostat with Apache, Lighttpd or other web servers which supports WSGI. 
 #### 1. Initialize GPIO on startup
 

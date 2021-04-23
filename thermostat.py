@@ -4,7 +4,7 @@ import sys
 import os
 import json
 from datetime import datetime
-import config
+import thermostat_config as config
 
 import RPi.GPIO as GPIO
 import Adafruit_DHT

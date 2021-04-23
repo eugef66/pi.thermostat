@@ -1,9 +1,10 @@
 import os
 from bottle import route, run, template, static_file, redirect, request
 import server  as s
+import client_config as config
 
 
-__logout_redirect_url="/login"
+_login_url=config.WEBROOT + "login"
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
@@ -12,7 +13,7 @@ def check_login():
 	if (s.validate_login()):
 		return True
 	else:
-		redirect (__logout_redirect_url)
+		redirect (_login_url)
 		return False
 
 

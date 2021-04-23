@@ -46,11 +46,12 @@ def get():
 
 
 @route('/set/<mode>/<temp>')
-def set(mode, temp):
+def set(mode, temp, schedule = None):
 	_api_response={}
 	if a.is_logged_in:	
 		try:
-			schedule = request.GET.get('sch')
+			if (schedule == None):
+				schedule = request.GET.get('sch')
 			t=th.thermostat()
 			if (schedule != None and len(schedule)>15):
 				t.Set(temp,mode,schedule)
@@ -60,12 +61,10 @@ def set(mode, temp):
 		except Exception as e:
 			_api_response["Status"]=False
 			_api_response["Error"] = e.args
-			return _api_response
-
 	else:
 		_api_response["Status"]=False
 		_api_response["Error"] = "Invalid Login"
-		return _api_response
+	return _api_response
 
 
 @route('/login', method='POST')
