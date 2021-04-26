@@ -1,10 +1,10 @@
 import os
 from bottle import route, run, template, static_file, redirect, request
 import server  as s
-import client_config as config
+import web_config as config
 
 
-_login_url=config.WEBROOT + "login"
+_login_url=config.WEBROOT + "/login"
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
@@ -18,7 +18,7 @@ def check_login():
 
 
 
-@route('/')
+@route(config.WEBROOT + '/')
 def index():
 	if check_login():
 		_response = s.get()
@@ -32,11 +32,12 @@ def index():
 											, Target_Temperature=_response["Target_Temperature"]
 											, Current_Mode=_response["Current_Mode"]
 											, Stage=_response["Stage"]
-											, Schedule=_response["Schedule"])
+											, Schedule=_response["Schedule"]
+											,Web_Root = config.WEBROOT)
 		else:
 			return("error_template")
 
-@route('/set/<mode>/<temp>')
+@route(config.WEBROOT + '/set/<mode>/<temp>')
 def set(mode, temp):
 	if check_login():
 		schedule = request.GET.get('sch')
@@ -44,36 +45,36 @@ def set(mode, temp):
 			s.set(mode,temp, schedule)
 		else:
 			s.set(mode,temp)
-		return redirect('/')
+		return redirect(config.WEBROOT + '/')
 
-@route('/login')
+@route(config.WEBROOT + '/login')
 def login():
 	return template('login_template',Message=None)
 
-@route('/login', method='POST')
+@route(config.WEBROOT + '/login', method='POST')
 def do_login():
 	pin = request.forms.get('pin')
 	if s.login(pin)["Status"]:
-		redirect ('/')
+		redirect (config.WEBROOT + '/')
 	else: 
 		return template('login_template', Message='Login incorrect')
 
 
 
 # static files
-@route('/images/<filename>')
+@route(config.WEBROOT + '/images/<filename>')
 def images(filename):
 	return static_file(filename, root= APP_PATH + '/images')
 
-@route('/css/<filename>')
+@route(config.WEBROOT + '/css/<filename>')
 def css(filename):
 	return static_file(filename, root=APP_PATH + '/css')
 
-@route('/fonts/<filename>')
+@route(config.WEBROOT + '/fonts/<filename>')
 def css(filename):
 	return static_file(filename, root=APP_PATH + '/fonts')
 
-@route('/js/<filename>')
+@route(config.WEBROOT + '/js/<filename>')
 def css(filename):
 	return static_file(filename, root=APP_PATH + '/js')
 
