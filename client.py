@@ -4,7 +4,6 @@ import server  as s
 import web_config as config
 
 
-_login_url=config.WEBROOT + "/login"
 
 APP_PATH = os.path.dirname(os.path.abspath(__file__))
 os.environ['PYTHON_EGG_CACHE'] = '__pycache__'
@@ -13,7 +12,7 @@ def check_login():
 	if (s.validate_login()):
 		return True
 	else:
-		redirect (_login_url)
+		redirect (config.WEBROOT + "/login")
 		return False
 
 
@@ -23,7 +22,6 @@ def index():
 	if check_login():
 		_response = s.get()
 		
-		print (_response)
 		if (_response["Status"]):
 
 			return template('index_template', Status=_response["Current_State"]
