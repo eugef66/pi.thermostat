@@ -49,7 +49,7 @@ def set(mode, temp):
 
 @route(config.WEBROOT + '/login')
 def login():
-	return template('login_template',Message=None)
+	return template('login_template',Message=None, Web_Root = config.WEBROOT)
 
 @route(config.WEBROOT + '/login', method='POST')
 def do_login():
@@ -57,7 +57,7 @@ def do_login():
 	if s.login(pin)["Status"]:
 		redirect (config.WEBROOT + '/')
 	else: 
-		return template('login_template', Message='Login incorrect')
+		return template('login_template', Message='Login incorrect',Web_Root = config.WEBROOT)
 
 
 
