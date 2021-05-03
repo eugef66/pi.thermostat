@@ -25,9 +25,10 @@ class auth_session:
 			json.dump(self.__session_data,sf)
 	
 	
-	def login(self, pin):
-		pin_hash = hashlib.sha256(pin.encode()).hexdigest()
-		if pin_hash == auth_pin.PIN_CODE:
+	def login(self, client_secret):
+		
+		pin_hash = hashlib.sha256(client_secret.encode()).hexdigest()
+		if client_secret==auth.PIN_HASH or pin_hash == auth_pin.PIN_HASH:
 			#create UUID
 			sid = str(uuid.uuid1())
 			dt = str (datetime.now())

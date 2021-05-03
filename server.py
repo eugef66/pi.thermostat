@@ -72,7 +72,7 @@ def login(pin=None):
     _api_response = {}
     try:
         if (pin == None):
-            pin = request.forms.get('pin')
+            pin = request.headers["client_secret"]
         if (a.login(pin)):
             _api_response["Status"] = True
         else:
