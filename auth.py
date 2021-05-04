@@ -28,7 +28,7 @@ class auth_session:
 	def login(self, client_secret):
 		
 		pin_hash = hashlib.sha256(client_secret.encode()).hexdigest()
-		if client_secret==auth.PIN_HASH or pin_hash == auth_pin.PIN_HASH:
+		if client_secret==auth.CLIENT_SECRET or pin_hash == auth_pin.CLIENT_SECRET:
 			#create UUID
 			sid = str(uuid.uuid1())
 			dt = str (datetime.now())
@@ -71,7 +71,7 @@ def genhash(pin):
 	#print (pin)
 	pinhash = hashlib.sha256(pin.encode()).hexdigest()
 	print (pinhash)
-	s = 'PIN_CODE = "' + pinhash + '"'
+	s = 'CLIENT_SECRET = "' + pinhash + '"'
 	with open(APP_PATH + "/auth_pin.py", "w+") as pin_code_file:
 		pin_code_file.write(s)
 
