@@ -39,7 +39,7 @@ add following command. Replace "app directory" with your working directory
  ### Standalone:
  This installation allows you to run thermostat using included "bottle" web server and doesn't require Apache, Lighttpd or other web servers installed. It is single-threaded and slow, but a good choice for a simple and quick setup if light use is excpected. 
 
-#### 1. Initialize GPIO on startup
+#### 1. Initialize GPIO on startup and start bottle web server
 
 	sudo nano /etc/rc.local
 
@@ -51,7 +51,11 @@ add following command before `exit(0)`
 ##### standalone SERVER-ONLY 
 	
 	python "app directroy"/server.py >> <app directory>/web.log 2>&1
- 
+
+restart RPI
+
+	sudo reboot 
+
 ### Advanced (with Apache2 server):
 This installation allows you to run thermostat with Apache, Lighttpd or other web servers which supports WSGI. 
 #### 1. Initialize GPIO on startup
@@ -62,7 +66,7 @@ add following command before `exit(0)`
 
 	python <APP DIRECTORY>/thermostat.py init >> <APP DIRECTORY>/thermostat.log 2>&1
 
-Also, make sure user that Apache is running as (usualy www-data) is added to gpio group
+Also, make sure user that user account Apache server is running as (usualy www-data) is added to gpio group
 
 	sudo usermod -aG gpio www-data 
 
