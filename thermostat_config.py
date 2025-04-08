@@ -1,7 +1,7 @@
 import sys
 
 # Uncomment the line below to use GPIO emulator and change path to emulators module
-sys.path.append("../pi.emulators")
+# sys.path.append("../pi.emulators")
 
 
 
