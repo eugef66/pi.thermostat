@@ -1,0 +1,57 @@
+# pi.thermostat configuration. Temperatures in F, durations in seconds.
+# Remove a pin line to say "not installed":
+#   no cool_pin -> heat-only install (COOL and AUTO disappear)
+#   no fan_pin  -> no Fan mode (4-wire installs)
+#   no heat2_pin -> single-stage heat
+
+[hardware]
+emulate = false
+relay_active_low = true
+sensor_pin = 4      # DHT22/AM2302 data, physical pin 7
+heat1_pin = 2       # IN1 -> W1
+cool_pin = 3        # IN2 -> Y
+heat2_pin = 5       # IN3 -> W2
+fan_pin = 6         # IN4 -> G
+
+[control]
+setpoint_min = 50
+setpoint_max = 85
+default_target = 70
+deadband = 1
+auto_gap = 4
+stage2_on_deficit = 3
+stage2_off_deficit = 2
+heat_min_on_s = 120
+heat_min_off_s = 120
+cool_min_on_s = 180
+cool_min_off_s = 300
+changeover_s = 300
+fan_with_cool = true
+fan_with_heat = false
+sensor_fail_limit = 5
+deadman_s = 300
+calibration = 0
+timezone = "America/New_York"
+
+[paths]
+state_file = "data/state.json"
+lock_file = "data/state.lock"
+log_file = "data/thermostat.log"
+
+[auth]
+# PIN/passphrase is set on the device with:  python -m thermostat set-pin
+pin_min_length = 6
+session_hours = 168        # 7 days
+cookie_secure = true       # false only for plain-HTTP development
+
+[server]
+host = "0.0.0.0"
+port = 8443                 # forward this port on your router to the Pi
+tls = true
+cert_file = "certs/fullchain.pem"   # pushed here by the certbot deploy hook
+key_file = "certs/privkey.pem"
+static_dir = "static"       # the web UI files
+engine = "cheroot"
+threads = 8
+cert_check_s = 60
+watchdog_interval_s = 30

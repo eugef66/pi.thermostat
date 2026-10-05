@@ -1,6 +1,6 @@
-Adafruit_DHT.py
-/RPi
-/__pycache__
-db.json
-.session
-*.code-workspace
+__pycache__/
+*.pyc
+data/
+certs/
+config.toml
+.venv/

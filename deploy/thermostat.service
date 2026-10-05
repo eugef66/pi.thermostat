@@ -1,0 +1,29 @@
+[Unit]
+Description=Thermostat API server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=thermostat
+Group=thermostat
+SupplementaryGroups=gpio
+WorkingDirectory=/opt/pi.thermostat
+Environment=THERMOSTAT_CONFIG=/opt/pi.thermostat/config.toml
+ExecStart=/opt/pi.thermostat/.venv/bin/python -m thermostat serve
+Restart=on-failure
+RestartSec=5
+
+# Hardening. /dev/gpiomem must stay visible, so PrivateDevices is NOT set.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/pi.thermostat/data
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+# Only needed if you set server.port below 1024:
+#AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

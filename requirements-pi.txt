@@ -1,0 +1,3 @@
+# Raspberry Pi only (not needed when hardware.emulate = true)
+RPi.GPIO
+adafruit-circuitpython-dht
