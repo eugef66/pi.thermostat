@@ -5,7 +5,7 @@ import os
 from PIL import Image, ImageDraw
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "static", "icons")
-STOPS = [(0.0, (247, 103, 7)), (0.5, (156, 54, 181)), (1.0, (28, 126, 214))]  # orange, purple, blue
+STOPS = [(0.0, (147, 203, 70)), (0.5, (56, 154, 81)), (1.0, (128, 226, 14))]  # orange, purple, blue
 
 
 def gradient(n):

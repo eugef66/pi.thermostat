@@ -59,7 +59,7 @@ Give the Pi a **fixed address**: in your router, reserve a DHCP lease for it
 
 Power the Pi **off** (`sudo poweroff`, then unplug) before wiring.
 
-![Wiring diagram](wiring.png)
+![Wiring diagram](wiring-diagram.png)
 
 (`wiring.svg` is the same diagram as a scalable file.)
 
