@@ -61,7 +61,12 @@ Power the Pi **off** (`sudo poweroff`, then unplug) before wiring.
 
 ![Wiring diagram](wiring.png)
 
-(`wiring.svg` is the same diagram as a scalable file.)
+And the Pi's 40-pin header with every pin this project uses highlighted. Use it to
+find the physical pins before you plug anything in:
+
+![Raspberry Pi 3B GPIO pin map](gpio-pinmap.png)
+
+(`wiring.svg` and `gpio-pinmap.svg` are the same diagrams as scalable files.)
 
 ### 3.1 Pi to sensor and relay board
 
@@ -77,6 +82,8 @@ Power the Pi **off** (`sudo poweroff`, then unplug) before wiring.
 | 5 | GPIO 3 | Relay **IN2** (Y, cooling) |
 | 29 | GPIO 5 | Relay **IN3** (W2, heat stage 2) |
 | 31 | GPIO 6 | Relay **IN4** (G, fan) |
+
+Want to rehearse first? [EMULATOR.md](EMULATOR.md) runs everything on a laptop.
 
 Why these pins: GPIO 2-8 are pulled **high** by the Pi from the instant power is
 applied, and your relay board is active-low (low = relay on). So every relay is
@@ -314,7 +321,7 @@ to confirm remote access works, and sign in.
 * **iPhone / iPad (Safari):** Share → **Add to Home Screen**.
 * **Android (Chrome):** menu → **Install app** or **Add to Home screen**.
 
-The icon is a dial; the name is "Thermostat". The login screen starts with the
+The icon is a yellow tile with a mint "72" display and red/blue arrows; the name is "Thermostat". To swap the look, run `python3 tools/make_icons.py --design 2` (or 3) on a computer and copy `static/icons/`. The login screen starts with the
 number pad; tap "Use letters instead" if your secret is a passphrase.
 
 ## 9. How it behaves (defaults, all in `config.toml`)

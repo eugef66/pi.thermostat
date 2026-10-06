@@ -89,7 +89,8 @@ class GpioPins:
 # -------------------------------------------------------------- sensors
 
 class EmulatedSensor:
-    """Reads data/emulated_sensor.json {"temp": 70, "humidity": 40} (deg F)."""
+    """Reads data/emulated_sensor.json {"temp": 70, "humidity": 40} (deg F).
+    {"fail": true} makes every read fail, like a disconnected sensor."""
 
     def __init__(self, path: str):
         self.path = path
@@ -99,6 +100,9 @@ class EmulatedSensor:
         try:
             with open(self.path) as f:
                 d = json.load(f)
+            if d.get("fail"):
+                self.last_error = "emulated failure"
+                return [None] * 3, [None] * 3
             t, h = float(d["temp"]), float(d.get("humidity", 40))
         except (FileNotFoundError, ValueError, KeyError):
             t, h = 70.0, 40.0

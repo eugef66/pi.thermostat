@@ -155,6 +155,47 @@ class CliTests(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
 
 
+class EmulatorHelperTests(unittest.TestCase):
+    def setUp(self):
+        self.d = tempfile.mkdtemp()
+        write_cfg(self.d)
+        os.makedirs(os.path.join(self.d, "data"))
+
+    def test_emu_temp_and_dev_loop_drive_relays(self):
+        self.assertEqual(run(self.d, "emu-temp", "66", "--humidity", "50")[0], 0)
+        run(self.d, "set", "--mode", "heat", "--temp", "70")
+        rc, out, _ = run(self.d, "dev-loop", "--interval", "0.01", "--count", "3")
+        self.assertEqual(rc, 0)
+        self.assertEqual(len(out.strip().splitlines()), 4)           # banner + 3 passes
+        self.assertIn("66.0F", out)
+        self.assertIn("relays: heat1, heat2", out)
+        rc, out, _ = run(self.d, "emu-pins")
+        self.assertRegex(out, r"W1 heat stage 1\s+GPIO 2\s+level 0\s+ON")
+        self.assertRegex(out, r"G fan\s+GPIO 6\s+level 1\s+off")
+
+    def test_emu_temp_fail_reaches_fail_safe(self):
+        run(self.d, "emu-temp", "66")
+        run(self.d, "set", "--mode", "heat", "--temp", "70")
+        run(self.d, "dev-loop", "--interval", "0.01", "--count", "1")
+        run(self.d, "emu-temp", "--fail")
+        rc, out, _ = run(self.d, "dev-loop", "--interval", "0.01", "--count", "5")
+        self.assertIn("FAULT: sensor", out)
+        self.assertIn("relays: none", out.strip().splitlines()[-1])
+        run(self.d, "emu-temp", "66")                                   # sensor "reconnected"
+        rc, out, _ = run(self.d, "dev-loop", "--interval", "0.01", "--count", "1")
+        self.assertNotIn("FAULT", out)
+
+    def test_emu_temp_arguments(self):
+        self.assertEqual(run(self.d, "emu-temp")[0], 2)
+
+    def test_emulator_commands_refuse_on_real_hardware_config(self):
+        write_cfg(self.d, emulate=False)
+        for cmd in (["emu-temp", "70"], ["emu-pins"], ["dev-loop", "--count", "1"]):
+            rc, _, err = run(self.d, *cmd)
+            self.assertEqual(rc, 2, cmd)
+            self.assertIn("emulate = true", err)
+
+
 class CachedCycleTests(unittest.TestCase):
     def test_cached_cycle_does_not_refresh_deadman(self):
         from tests.helpers import Sim

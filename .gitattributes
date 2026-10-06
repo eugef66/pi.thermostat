@@ -1,4 +1,0 @@
-*.php linguist-vendored
-fonts/* linguist-vendored
-css/* linguist-vendored
-js/* linguist-vendored

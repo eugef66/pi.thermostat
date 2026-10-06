@@ -1,58 +1,70 @@
-"""Regenerates static/icons/*.png from the same design as icon.svg (needs Pillow).
-Design: orange-purple-blue diagonal gradient, white dial ring, needle and hub."""
-import math
+"""Regenerates static/icons/* from tools/icon_designs.py (needs Pillow).
+    python3 tools/make_icons.py              # default design 1
+    python3 tools/make_icons.py --design 2   # 1 classic, 2 night display, 3 bold & simple
+The 32 px favicon always uses design 3, the one that stays legible when tiny."""
+import argparse
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image, ImageDraw
+import icon_designs as D
 
-OUT = os.path.join(os.path.dirname(__file__), "..", "static", "icons")
-STOPS = [(0.0, (147, 203, 70)), (0.5, (56, 154, 81)), (1.0, (128, 226, 14))]  # orange, purple, blue
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", "icons")
 
 
-def gradient(n):
-    img = Image.new("RGB", (n, n))
-    px = img.load()
-    for y in range(n):
-        for x in range(n):
-            t = (x + y) / (2 * (n - 1))
-            (t0, c0), (t1, c1) = (STOPS[0], STOPS[1]) if t < 0.5 else (STOPS[1], STOPS[2])
-            u = (t - t0) / (t1 - t0)
-            px[x, y] = tuple(round(c0[i] + (c1[i] - c0[i]) * u) for i in range(3))
+def rounded(img, frac=.22):
+    n = img.size[0]
+    m = Image.new("L", (n * 4, n * 4), 0)
+    ImageDraw.Draw(m).rounded_rectangle([0, 0, n * 4 - 1, n * 4 - 1], radius=n * 4 * frac, fill=255)
+    img = img.copy()
+    img.putalpha(m.resize((n, n), Image.LANCZOS))
     return img
 
 
-def artwork(n, scale):
-    """White dial drawn at 4x then downsampled. `scale` shrinks it (maskable safe zone)."""
-    k = 4
-    big = Image.new("RGBA", (n * k, n * k), (0, 0, 0, 0))
-    d = ImageDraw.Draw(big)
-    c = n * k / 2
-    r = n * k * 0.34 * scale
-    d.ellipse([c - r, c - r, c + r, c + r], outline="white", width=round(n * k * 0.055 * scale))
-    ang = math.radians(-50)                      # needle pointing up-right
-    L = r * 0.58
-    tip = (c + L * math.sin(-ang), c - L * math.cos(-ang))
-    w = round(n * k * 0.05 * scale)
-    d.line([(c, c), tip], fill="white", width=w)
-    for p in (tip, (c, c)):
-        d.ellipse([p[0] - w / 2, p[1] - w / 2, p[0] + w / 2, p[1] + w / 2], fill="white")
-    h = n * k * 0.05 * scale
-    d.ellipse([c - h, c - h, c + h, c + h], fill="white")
-    return big.resize((n, n), Image.LANCZOS)
+def svg_design_1() -> str:
+    """Vector twin of design 1 (same geometry as the PNGs)."""
+    def pts(poly):
+        return " ".join(f"{x * 512:.1f},{y * 512:.1f}" for x, y in poly)
+
+    def rr(box, r, fill, extra=""):
+        x0, y0, x1, y1 = box
+        return (f'<rect x="{x0 * 512:.1f}" y="{y0 * 512:.1f}" width="{(x1 - x0) * 512:.1f}" '
+                f'height="{(y1 - y0) * 512:.1f}" rx="{r * 512:.1f}" fill="{fill}" {extra}/>')
+
+    digits = "".join(
+        f'<polygon points="{pts(p)}"/>'
+        for i, ch in enumerate("72") for p in D.digit_polys(.13 + i * .27, .30, .21, .40, .05, ch))
+    tri = lambda up, col, cy: (f'<polygon points="{pts(D.triangle(.815, cy, .115, .10, up))}" fill="{col}" '
+                               f'stroke="{col}" stroke-width="{.024 * 512:.1f}" stroke-linejoin="round"/>')
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="y" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd640"/><stop offset="1" stop-color="#ffb000"/></linearGradient>
+    <linearGradient id="m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#78f5b6"/><stop offset="1" stop-color="#00c494"/></linearGradient>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="7" stdDeviation="6" flood-opacity=".28"/></filter>
+  </defs>
+  <rect width="512" height="512" rx="113" fill="url(#y)"/>
+  <g filter="url(#s)">{rr(D_PANEL, .09, "url(#m)")}{rr(D_PILL, .105, "#fff")}</g>
+  <g fill="#0e2826" stroke="#0e2826" stroke-width="{.0045 * 512 * 2:.1f}" stroke-linejoin="round">{digits}</g>
+  <line x1="{.75 * 512}" y1="256" x2="{.88 * 512}" y2="256" stroke="#d8dee4" stroke-width="4"/>
+  {tri(True, "#e63946", .355)}{tri(False, "#1e88e5", .645)}
+</svg>
+'''
 
 
-def icon(n, maskable=False, rounded=False):
-    img = gradient(n).convert("RGBA")
-    img.alpha_composite(artwork(n, 0.8 if maskable else 1.0))
-    if rounded:
-        mask = Image.new("L", (n * 4, n * 4), 0)
-        ImageDraw.Draw(mask).rounded_rectangle([0, 0, n * 4 - 1, n * 4 - 1], radius=n * 4 * 0.22, fill=255)
-        img.putalpha(mask.resize((n, n), Image.LANCZOS))
-    return img
+D_PANEL, D_PILL = D.PANEL, D.PILL
 
-
-os.makedirs(OUT, exist_ok=True)
-icon(192, rounded=True).save(os.path.join(OUT, "icon-192.png"))
-icon(512, rounded=True).save(os.path.join(OUT, "icon-512.png"))
-icon(512, maskable=True).save(os.path.join(OUT, "icon-maskable-512.png"))
-icon(180).convert("RGB").save(os.path.join(OUT, "apple-touch-icon-180.png"))   # iOS rounds it itself
-icon(32, rounded=True).save(os.path.join(OUT, "favicon-32.png"))
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--design", default="1", choices=sorted(D.DESIGNS))
+    a = ap.parse_args()
+    design = D.DESIGNS[a.design][1]
+    os.makedirs(OUT, exist_ok=True)
+    rounded(design(192)).save(os.path.join(OUT, "icon-192.png"))
+    rounded(design(512)).save(os.path.join(OUT, "icon-512.png"))
+    design(512, 0.8).save(os.path.join(OUT, "icon-maskable-512.png"))        # full bleed, art in the safe zone
+    design(180).convert("RGB").save(os.path.join(OUT, "apple-touch-icon-180.png"))   # iOS rounds it itself
+    rounded(D.design_3(32)).save(os.path.join(OUT, "favicon-32.png"))
+    with open(os.path.join(OUT, "icon.svg"), "w") as f:
+        f.write(svg_design_1())
+    print(f"wrote icons from design {a.design} ({D.DESIGNS[a.design][0]})")

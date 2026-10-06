@@ -1,18 +1,14 @@
-"""Draws docs/wiring.svg and docs/wiring.png from one description (needs Pillow
-for the PNG). Run:  python3 tools/make_wiring_diagram.py"""
+"""Draws docs/wiring.svg and docs/wiring.png. Run: python3 tools/make_wiring_diagram.py"""
 import os
-from xml.sax.saxutils import escape
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from drawlib import Canvas
 
 W, H = 1200, 980
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
-prims = []   # drawing list shared by both renderers
-
-
-def rect(x, y, w, h, fill="none", stroke="#333", sw=2, r=10): prims.append(("rect", x, y, w, h, fill, stroke, sw, r))
-def text(x, y, s, size=14, anchor="start", bold=False, fill="#222", italic=False): prims.append(("text", x, y, s, size, anchor, bold, fill, italic))
-def poly(pts, color, sw=3): prims.append(("poly", pts, color, sw))
-def bez(p0, c1, c2, p1, color, sw=3): prims.append(("bez", p0, c1, c2, p1, color, sw))
-def dot(x, y, r=5, fill="#222"): prims.append(("dot", x, y, r, fill))
+C = Canvas(W, H, title="pi.thermostat wiring diagram")
+rect, text, poly, bez, dot = C.rect, C.text, C.poly, C.bez, C.dot
 
 
 # ---------------------------------------------------------------- title
@@ -116,86 +112,10 @@ for i, n in enumerate(notes):
     text(44, 893 + i * 20, "\u2022 " + n, 12.5)
 text(1180, 960, "Wire colours are conventions; yours may differ.", 11, "end", fill="#888", italic=True)
 
-# ============================================================== SVG renderer
-def svg():
-    out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
-           'font-family="DejaVu Sans, Verdana, Arial, sans-serif">',
-           '<title>pi.thermostat wiring diagram</title>']
-    for p in prims:
-        k = p[0]
-        if k == "rect":
-            _, x, y, w, h, fill, stroke, sw, r = p
-            out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"/>')
-        elif k == "text":
-            _, x, y, s, size, anchor, bold, fill, italic = p
-            out.append(f'<text x="{x}" y="{y}" font-size="{size}" text-anchor="{anchor}" fill="{fill}"'
-                       + (' font-weight="bold"' if bold else '') + (' font-style="italic"' if italic else '')
-                       + f'>{escape(s)}</text>')
-        elif k == "poly":
-            _, pts, col, sw = p
-            out.append('<polyline fill="none" stroke-linejoin="round" stroke-linecap="round" '
-                       f'stroke="{col}" stroke-width="{sw}" points="{" ".join(f"{x},{y}" for x, y in pts)}"/>')
-        elif k == "bez":
-            _, a, b, c, d, col, sw = p
-            out.append(f'<path fill="none" stroke-linecap="round" stroke="{col}" stroke-width="{sw}" '
-                       f'd="M{a[0]},{a[1]} C{b[0]},{b[1]} {c[0]},{c[1]} {d[0]},{d[1]}"/>')
-        elif k == "dot":
-            _, x, y, r, fill = p
-            out.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{fill}"/>')
-    out.append("</svg>")
-    return "\n".join(out)
-
-
-# ============================================================== PNG renderer
-def png(path, scale=2, ss=2):
-    from PIL import Image, ImageDraw, ImageFont
-    k = scale * ss
-    img = Image.new("RGB", (W * k, H * k), "#fbfaf6")
-    d = ImageDraw.Draw(img)
-    base = "/usr/share/fonts/truetype/dejavu/"
-    fonts = {}
-
-    def font(size, bold, italic):
-        key = (size, bold, italic)
-        if key not in fonts:
-            name = "DejaVuSans" + ("-BoldOblique" if bold and italic else "-Bold" if bold else "-Oblique" if italic else "")
-            fonts[key] = ImageFont.truetype(base + name + ".ttf", round(size * k))
-        return fonts[key]
-
-    for p in prims:
-        t = p[0]
-        if t == "rect":
-            _, x, y, w, h, fill, stroke, sw, r = p
-            if stroke == "none" and r == 0:
-                d.rectangle([x * k, y * k, (x + w) * k, (y + h) * k], fill=None if fill == "none" else fill)
-            else:
-                d.rounded_rectangle([x * k, y * k, (x + w) * k, (y + h) * k], radius=r * k,
-                                    fill=None if fill == "none" else fill,
-                                    outline=None if stroke == "none" else stroke, width=max(1, round(sw * k)))
-        elif t == "text":
-            _, x, y, s, size, anchor, bold, fill, italic = p
-            d.text((x * k, y * k), s, font=font(size, bold, italic), fill=fill,
-                   anchor={"start": "ls", "middle": "ms", "end": "rs"}[anchor])
-        elif t == "poly":
-            _, pts, col, sw = p
-            d.line([(x * k, y * k) for x, y in pts], fill=col, width=round(sw * k), joint="curve")
-        elif t == "bez":
-            _, a, b, c, e, col, sw = p
-            pts = []
-            for i in range(81):
-                u = i / 80
-                pts.append(tuple(((1 - u) ** 3 * a[j] + 3 * (1 - u) ** 2 * u * b[j]
-                                  + 3 * (1 - u) * u ** 2 * c[j] + u ** 3 * e[j]) * k for j in range(2)))
-            d.line(pts, fill=col, width=round(sw * k), joint="curve")
-        elif t == "dot":
-            _, x, y, r, fill = p
-            d.ellipse([(x - r) * k, (y - r) * k, (x + r) * k, (y + r) * k], fill=fill)
-    img.resize((W * scale, H * scale), Image.LANCZOS).save(path)
-
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "wiring.svg"), "w") as f:
-        f.write(svg())
-    png(os.path.join(OUT, "wiring.png"))
+        f.write(C.svg())
+    C.png(os.path.join(OUT, "wiring.png"))
     print("wrote docs/wiring.svg and docs/wiring.png")

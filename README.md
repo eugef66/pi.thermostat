@@ -5,7 +5,9 @@ two stages), an air conditioner and a blower fan through a relay board, reads a
 DHT22/AM2302 temperature and humidity sensor, and serves a phone-friendly app over
 HTTPS with a Let's Encrypt certificate.
 
-* **Install and wire it:** [docs/INSTALL.md](docs/INSTALL.md) (with the [wiring diagram](docs/wiring.png))
+* **Install and wire it:** [docs/INSTALL.md](docs/INSTALL.md), with the
+  [wiring diagram](docs/wiring.png) and the [Pi 3B GPIO pin map](docs/gpio-pinmap.png)
+* **Try it on a laptop, no hardware:** [docs/EMULATOR.md](docs/EMULATOR.md)
 * Rewritten from scratch; the earlier Bottle/Apache version is gone.
 
 ## Features
@@ -63,7 +65,8 @@ body, 422 invalid value, 429 throttled (with `Retry-After`), 503 controller busy
 
 `python -m thermostat [-c config.toml] [-v] <command>`:
 `proc`, `get [--json]`, `set --mode M [--temp T] [--start ISO]`, `cancel-pending`,
-`init`, `serve`, `set-pin`, `check-config`, `test-sensor`, `test-relays`.
+`init`, `serve`, `set-pin`, `check-config`, `test-sensor`, `test-relays`; and for the
+emulator only: `emu-temp`, `emu-pins`, `dev-loop`.
 
 ## Security model
 
@@ -81,23 +84,23 @@ body, 422 invalid value, 429 throttled (with `Retry-After`), 503 controller busy
 
 ## Development (no Raspberry Pi needed)
 
+The emulator runs the whole application on a laptop: fake relays, a fake sensor you
+control with `emu-temp`, and `dev-loop` in place of cron. The full walkthrough is in
+[docs/EMULATOR.md](docs/EMULATOR.md). The short version:
+
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt pillow
-cp config.example.toml config.toml        # set  emulate = true, tls = false,
-                                          # and [auth] cookie_secure = false
-.venv/bin/python -m thermostat set-pin
-.venv/bin/python -m thermostat serve      # http://localhost:8443
-echo '{"temp": 66, "humidity": 45}' > data/emulated_sensor.json   # fake sensor
-.venv/bin/python -m thermostat proc       # run a control pass by hand
-.venv/bin/python -m unittest discover -s tests -t .
+python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+cp config.emulator.example.toml config.toml
+python -m thermostat set-pin
+python -m thermostat serve                       # terminal 1: http://localhost:8080
+python -m thermostat dev-loop --interval 5       # terminal 2: stand-in for cron
+python -m thermostat emu-temp 66                 # terminal 3: set the room temperature
+python -m unittest discover -s tests -t .        # tests (Pillow and Node optional)
 ```
 
-The emulator keeps pin levels in `data/emulated_pins.json` so separate processes see
-each other, like real pins. Tests also use Node (for the browser-code tests, skipped
-if missing) and Pillow (icons). `engine = "wsgiref"` selects the stdlib server for
-development only; production uses Cheroot.
-
-Regenerate artwork: `python3 tools/make_icons.py`, `python3 tools/make_wiring_diagram.py`.
+Regenerate artwork: `python3 tools/make_icons.py [--design 1|2|3]`,
+`python3 tools/make_wiring_diagram.py`, `python3 tools/make_pinmap.py`,
+`python3 tools/preview_icons.py` (icon options sheet).
 
 ## Layout
 
@@ -105,7 +108,7 @@ Regenerate artwork: `python3 tools/make_icons.py`, `python3 tools/make_wiring_di
 thermostat/   config, state, control, hardware, engine, auth, webapp, api, static, server, cli
 static/       the web app (index.html, style.css, app.js, manifest, icons)
 deploy/       systemd unit, crontab, certbot deploy hook, `th` helper
-docs/         INSTALL.md, wiring diagram
+docs/         INSTALL.md, EMULATOR.md, wiring diagram, GPIO pin map, icon options
 tests/        unit, API, server (real TLS), UI (runs app.js in Node)
 tools/        icon and diagram generators
 ```

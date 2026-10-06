@@ -10,6 +10,9 @@
   set-pin         set the login PIN/passphrase
   serve           run the HTTPS API server
   check-config    validate the config and show what is installed
+  emu-temp        (emulator) set the pretend room temperature, or --fail
+  emu-pins        (emulator) show relay states
+  dev-loop        (emulator) run `proc` every few seconds instead of cron
 """
 from __future__ import annotations
 
@@ -180,12 +183,80 @@ def cmd_check_config(cfg, store, hw, log, args):
     return 0
 
 
-NEEDS_HARDWARE = {"proc", "set", "cancel-pending", "init", "test-sensor", "test-relays", "serve"}
+def _require_emulator(cfg):
+    if not cfg.hardware.emulate:
+        print("error: this command only works with hardware.emulate = true", file=sys.stderr)
+        return False
+    return True
+
+
+def cmd_emu_temp(cfg, store, hw, log, args):
+    """Set the pretend room temperature (or make the sensor fail)."""
+    if not _require_emulator(cfg):
+        return 2
+    path = os.path.join(os.path.dirname(cfg.paths.state_file), "emulated_sensor.json")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    if args.fail:
+        data = {"fail": True}
+    elif args.temp is None:
+        print("error: give a temperature, or --fail", file=sys.stderr)
+        return 2
+    else:
+        data = {"temp": args.temp, "humidity": args.humidity}
+    with open(path, "w") as f:
+        json.dump(data, f)
+    print("emulated sensor:", "FAILING" if args.fail else f"{args.temp:g} F, {args.humidity:g}% humidity")
+    return 0
+
+
+def cmd_emu_pins(cfg, store, hw, log, args):
+    """Show what the relays are doing right now."""
+    if not _require_emulator(cfg):
+        return 2
+    on = hw.read_relays()
+    for n in RELAY_NAMES:
+        if n in hw.pin_of:
+            pin = hw.pin_of[n]
+            print(f"{LABELS[n]:<18} GPIO {pin:<2} level {hw.pins.level(pin)}  "
+                  f"{'ON ' if on[n] else 'off'}")
+    return 0
+
+
+def cmd_dev_loop(cfg, store, hw, log, args):
+    """Stand-in for cron on a laptop: one control pass every few seconds."""
+    if not _require_emulator(cfg):
+        return 2
+    print(f"running a control pass every {args.interval:g}s; Ctrl-C to stop")
+    n = 0
+    try:
+        while True:
+            samples, hum = engine.read_sensor_safely(hw, log)
+            _, st = engine.run_cycle(cfg, store, hw, log, samples=samples, humidity=hum)
+            r = st.get("reading")
+            temp_txt = "%.1fF" % r["temp"] if r else "--"
+            on = [x for x in RELAY_NAMES if st["relays"][x]["on"]] or ["none"]
+            fault = "  FAULT: " + st["fault"]["code"] if st["fault"] else ""
+            print("%s  %7s  %-4s %gF  relays: %s%s" % (
+                datetime.now().strftime("%H:%M:%S"), temp_txt, st["mode"], st["target"],
+                ", ".join(on), fault), flush=True)
+            n += 1
+            if args.count and n >= args.count:
+                return 0
+            time.sleep(args.interval)
+    except KeyboardInterrupt:
+        print()
+        return 0
+
+
+NEEDS_HARDWARE = {"proc", "set", "cancel-pending", "init", "test-sensor", "test-relays", "serve", "emu-pins", "dev-loop"}
+
+EMULATOR_ONLY = {"emu-pins", "dev-loop"}
 
 COMMANDS = {"proc": cmd_proc, "get": cmd_get, "set": cmd_set,
             "cancel-pending": cmd_cancel, "init": cmd_init,
             "test-sensor": cmd_test_sensor, "set-pin": cmd_set_pin,
-            "serve": cmd_serve, "check-config": cmd_check_config, "test-relays": cmd_test_relays}
+            "serve": cmd_serve, "emu-temp": cmd_emu_temp,
+            "emu-pins": cmd_emu_pins, "dev-loop": cmd_dev_loop, "check-config": cmd_check_config, "test-relays": cmd_test_relays}
 
 
 def build_parser():
@@ -198,6 +269,13 @@ def build_parser():
         sp = sub.add_parser(name)
         if name == "get":
             sp.add_argument("--json", action="store_true")
+        if name == "emu-temp":
+            sp.add_argument("temp", nargs="?", type=float, help="room temperature in F")
+            sp.add_argument("--humidity", type=float, default=45.0)
+            sp.add_argument("--fail", action="store_true", help="make the sensor fail")
+        if name == "dev-loop":
+            sp.add_argument("--interval", type=float, default=10.0, help="seconds between passes")
+            sp.add_argument("--count", type=int, default=0, help="stop after N passes (0 = forever)")
         if name == "set":
             sp.add_argument("--mode", required=True)
             sp.add_argument("--temp", type=float)
@@ -214,7 +292,9 @@ def main(argv=None) -> int:
         return 3
     log = logsetup.setup(cfg.paths.log_file, verbose=args.verbose)
     store = StateStore(cfg.paths.state_file, cfg.paths.lock_file, cfg.control.default_target)
-    hw = open_hardware(cfg) if args.command in NEEDS_HARDWARE else None
+    hw = None
+    if args.command in NEEDS_HARDWARE and (cfg.hardware.emulate or args.command not in EMULATOR_ONLY):
+        hw = open_hardware(cfg)      # emulator-only commands never touch real pins
     try:
         return COMMANDS[args.command](cfg, store, hw, log, args)
     except BrokenPipeError:      # e.g. `th get | head`: the work is done, ignore
