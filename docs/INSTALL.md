@@ -189,8 +189,10 @@ th test-sensor       # 10 reads
 th test-relays       # press Enter to click each relay for 3 seconds
 ```
 
-* You should hear K1, K2, K3, K4 click one at a time, in the order W1, Y, W2, G.
-  The matching IN LED lights while it is on. If the wrong channel responds, fix
+* You should hear one relay click at a time, in this order: **W1 (K1), W2 (K3),
+  Y (K2), G (K4)**. Note the order is not K1 to K4: it follows the equipment
+  (heat stage 1, heat stage 2, cooling, fan). The matching IN LED lights while it
+  is on. If the wrong channel responds, fix
   the wiring or swap the pin numbers in `config.toml`.
 
 ```bash

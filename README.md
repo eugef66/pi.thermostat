@@ -8,6 +8,7 @@ HTTPS with a Let's Encrypt certificate.
 * **Install and wire it:** [docs/INSTALL.md](docs/INSTALL.md), with the
   [wiring diagram](docs/wiring.png) and the [Pi 3B GPIO pin map](docs/gpio-pinmap.png)
 * **Try it on a laptop, no hardware:** [docs/EMULATOR.md](docs/EMULATOR.md)
+* **Every command and API call, with examples:** [docs/REFERENCE.md](docs/REFERENCE.md)
 * Rewritten from scratch; the earlier Bottle/Apache version is gone.
 
 ## Features
@@ -108,7 +109,7 @@ Regenerate artwork: `python3 tools/make_icons.py [--design 1|2|3]`,
 thermostat/   config, state, control, hardware, engine, auth, webapp, api, static, server, cli
 static/       the web app (index.html, style.css, app.js, manifest, icons)
 deploy/       systemd unit, crontab, certbot deploy hook, `th` helper
-docs/         INSTALL.md, EMULATOR.md, wiring diagram, GPIO pin map, icon options
+docs/         INSTALL.md, EMULATOR.md, REFERENCE.md, wiring diagram, GPIO pin map, icon options
 tests/        unit, API, server (real TLS), UI (runs app.js in Node)
 tools/        icon and diagram generators
 ```

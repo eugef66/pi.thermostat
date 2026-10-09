@@ -125,6 +125,13 @@ Delete `cool_pin` from `config.toml` (heat-only house) or `fan_pin` (no fan wire
 restart the server: the app's mode buttons change to match. Delete `heat2_pin` for
 single-stage heat.
 
+**Big temperature jumps take two passes.** Like the real sensor code, the emulator
+path ignores a change of more than 5 °F in one step until the next pass repeats it
+(a DHT22 occasionally returns a wild value). So after `emu-temp 60` followed by
+`emu-temp 76`, the first `dev-loop` line still shows the old temperature and the log
+says `sensor jump to 76.0F rejected, awaiting confirmation`; the next pass accepts it.
+Moving in steps of 5 °F or less avoids the delay.
+
 ## 4. Seeing what is going on
 
 ```bash
