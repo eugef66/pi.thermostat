@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thermostat</title>
+<meta name="theme-color" content="#f4f1ea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Thermostat">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<main id="app">
+
+  <section id="view-loading" class="center">
+    <p id="loading-text">Loading…</p>
+    <button id="retry-load" class="secondary" hidden>Try again</button>
+  </section>
+
+  <section id="view-login" class="center" hidden>
+    <h1>Thermostat</h1>
+    <form id="login-form" autocomplete="on">
+      <label for="pin">PIN</label>
+      <input id="pin" name="password" type="password" inputmode="numeric"
+             autocomplete="current-password" autocapitalize="off" spellcheck="false" required>
+      <button id="pin-mode" class="linkish" type="button">Use letters instead</button>
+      <button id="login-btn" class="primary" type="submit">Unlock</button>
+      <p id="login-error" class="form-error" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section id="view-main" hidden>
+    <header class="top">
+      <h1>Thermostat</h1>
+      <span id="link" class="link" aria-live="off">…</span>
+    </header>
+
+    <div id="banners" aria-live="polite"></div>
+
+    <div id="dial" class="dial" data-activity="idle">
+      <div id="activity" class="activity">Idle</div>
+      <div class="temp"><span id="temp">--</span><span class="unit">°F</span></div>
+      <div id="hum" class="hum">Humidity --</div>
+    </div>
+
+    <div id="setpoint" class="setpoint">
+      <button id="dec" class="round" aria-label="Lower target temperature">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+      </button>
+      <div class="target">
+        <div class="label">Target</div>
+        <div id="target" class="value">--</div>
+      </div>
+      <button id="inc" class="round" aria-label="Raise target temperature">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+      </button>
+    </div>
+
+    <div id="modes" class="modes" role="radiogroup" aria-label="Mode"></div>
+
+    <div id="schedule" class="schedule" hidden>
+      <label class="check"><input id="later" type="checkbox"> Start later</label>
+      <input id="start-at" type="datetime-local" hidden aria-label="Start time">
+    </div>
+
+    <button id="apply" class="primary" hidden>Apply</button>
+
+    <div id="pending" class="card" hidden>
+      <div>
+        <div class="label">Scheduled</div>
+        <div id="pending-text"></div>
+      </div>
+      <button id="cancel-pending" class="secondary">Cancel</button>
+    </div>
+
+    <details class="details">
+      <summary>Equipment</summary>
+      <ul id="relays" class="relays"></ul>
+    </details>
+
+    <footer>
+      <button id="logout" class="linkish">Log out</button>
+    </footer>
+  </section>
+
+  <div id="toast" class="toast" role="alert" hidden></div>
+</main>
+</body>
+</html>

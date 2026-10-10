@@ -1,0 +1,4 @@
+# /etc/cron.d/thermostat  (run as the thermostat user, which is in the gpio group)
+# Boot: make sure every relay is off. Every minute: one control pass.
+@reboot   thermostat cd /opt/pi.thermostat && .venv/bin/python -m thermostat init
+* * * * * thermostat cd /opt/pi.thermostat && .venv/bin/python -m thermostat proc

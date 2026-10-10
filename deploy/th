@@ -1,0 +1,6 @@
+#!/bin/sh
+# Short command for the thermostat CLI: `th get`, `th set --mode heat --temp 70`, ...
+# Install:  sudo install -m 755 deploy/th /usr/local/bin/th
+cd /opt/pi.thermostat || exit 1
+exec sudo -u thermostat /opt/pi.thermostat/.venv/bin/python -m thermostat \
+     -c /opt/pi.thermostat/config.toml "$@"
