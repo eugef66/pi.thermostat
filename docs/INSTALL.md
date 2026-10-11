@@ -28,6 +28,7 @@ an extra layer, never the only one.
 | Female-to-female jumper wires, small screwdriver | |
 | Thermostat wire: R, W1, W2, Y, G (C optional) | The new 6-wire run has all of them. |
 | A computer with an SD card reader | To flash the OS. |
+| A host name for your home | A domain, or a dynamic-DNS name, pointing at your public IP address (section 8). Needed for the HTTPS certificate. |
 
 ## 2. Flash Raspberry Pi OS Lite
 
@@ -242,22 +243,116 @@ internet.**
 
 Log: `data/thermostat.log`. Follow it with `tail -f /opt/pi.thermostat/data/thermostat.log`.
 
-## 7. Certificate (Let's Encrypt, from your Nextcloud server)
+## 7. Certificate (HTTPS)
 
-Your Nextcloud server already renews a certificate that lists the thermostat
-hostname. The Pi receives a copy after each renewal; nothing needs to be open
-for it.
+The server needs two PEM files in `/opt/pi.thermostat/certs/`:
 
-**On the Nextcloud server** (as root):
+* `fullchain.pem`: your certificate followed by the issuer's intermediate certificate(s)
+* `privkey.pem`: its private key (mode 600, owned by `thermostat`)
+
+It does not care how they get there. When either file changes it loads the new pair
+within a minute, with no restart, and keeps the old one if the new pair is invalid. So
+the only decision is how you obtain and renew the certificate.
+
+**Before you start:** you need a host name that points at your home's public address (a
+domain you own, or a name from a dynamic-DNS service; see section 8). Let's Encrypt
+cannot issue certificates for bare IP addresses or private names such as
+`thermostat.local`, and the browser will only trust a certificate that lists the exact
+name you type. Throughout this section the example name is `thermostat.example.com`.
+
+### Choose how to get the certificate
+
+| Your situation | Use |
+|---|---|
+| You can forward port 80 to the Pi | **Option A**: certbot on the Pi |
+| You use a DNS provider that certbot can drive through an API, and would rather not open port 80 | **Option B**: DNS challenge |
+| Another machine you control already obtains certificates for this name | **Option C**: copy from that machine |
+| You already have certificate files (commercial, or from your own CA) | **Option D**: place the files |
+
+> While experimenting with options A to C, add `--staging` to the certbot command.
+> Let's Encrypt limits repeated real issuance, and staging certificates are not trusted
+> by browsers, so remove the flag for the real one.
+
+### Option A: certbot on the Pi (port 80)
+
+Let's Encrypt proves you control the name by connecting to **port 80** on it. certbot
+opens that port itself, only while it checks.
+
+```bash
+sudo apt install certbot
+sudo ufw allow 80/tcp        # only if you enabled the firewall in section 8
+```
+
+In your router, forward external TCP port **80** to the Pi's port 80 (alongside the
+8443 forward in section 8). Then:
+
+```bash
+sudo certbot certonly --standalone -d thermostat.example.com \
+     --agree-tos -m you@example.com
+```
+
+Nothing else on the Pi may be using port 80. certbot stores the certificate in
+`/etc/letsencrypt/live/thermostat.example.com/`, readable only by root, so install the
+hook that copies it to the thermostat after every issue or renewal:
+
+```bash
+sudo install -m 755 /opt/pi.thermostat/deploy/certbot-deploy-hook-local.sh \
+     /etc/letsencrypt/renewal-hooks/deploy/thermostat.sh
+sudo nano /etc/letsencrypt/renewal-hooks/deploy/thermostat.sh   # set CERT_NAME=thermostat.example.com
+sudo /etc/letsencrypt/renewal-hooks/deploy/thermostat.sh        # first copy, by hand
+sudo systemctl restart thermostat
+```
+
+certbot installs a timer that checks twice a day and renews a certificate once it is
+close to expiry (by default 30 days before; Let's Encrypt certificates have been
+getting shorter-lived, and the timer keeps up automatically). **Port 80 must stay
+forwarded** for those renewals; certbot listens on it for a few seconds each time. Check the timer and rehearse a
+renewal with:
+
+```bash
+systemctl list-timers | grep certbot
+sudo certbot renew --dry-run
+```
+
+### Option B: DNS challenge (no open ports)
+
+certbot proves control by adding a temporary DNS record instead, so no inbound port is
+needed. You need a domain whose DNS host has an API that a certbot plugin supports
+(Cloudflare, Route 53 and many others; see the certbot documentation for the full list
+and each plugin's settings). Many free dynamic-DNS host names do not offer this.
+
+Example for a provider with a plugin packaged by Debian (Cloudflare shown; replace the
+package and options for your provider):
+
+```bash
+sudo apt install certbot python3-certbot-dns-cloudflare
+sudo install -m 600 /dev/null /root/cloudflare.ini
+sudo nano /root/cloudflare.ini            # dns_cloudflare_api_token = YOUR_TOKEN
+sudo certbot certonly --dns-cloudflare \
+     --dns-cloudflare-credentials /root/cloudflare.ini \
+     -d thermostat.example.com --agree-tos -m you@example.com
+```
+
+Then install the same hook as in Option A (the three commands after `certbot certonly`
+there). Renewals run unattended from the same certbot timer.
+
+### Option C: copy it from another machine
+
+If a different machine you control already gets certificates for this name (any
+machine with certbot, or another ACME client), have it push the files to the Pi after
+each renewal. The supplied script does this over SSH with a key that can only write
+into the Pi's `certs/` folder. The certificate there must list the thermostat's host
+name.
+
+**On the issuing machine** (as root):
 
 ```bash
 ssh-keygen -t ed25519 -N '' -f /root/.ssh/thermostat_deploy -C deploy
 cat /root/.ssh/thermostat_deploy.pub
 ```
 
-**On the Pi**, as the `thermostat` user, create `~/.ssh/authorized_keys` with one
-line, replacing the key and the Nextcloud server's LAN address. This restricts the
-key to writing files into `certs/`:
+**On the Pi**, as the `thermostat` user, create `~/.ssh/authorized_keys` with one line,
+replacing the key and the issuing machine's LAN address:
 
 ```
 command="rrsync -wo /opt/pi.thermostat/certs",restrict,from="192.168.1.20" ssh-ed25519 AAAA... deploy
@@ -273,34 +368,68 @@ sudo chown -R thermostat:thermostat /home/thermostat/.ssh
 (The account has no password, so the only way in is that key, and the `command=`
 restriction means the key can run nothing but rrsync into `certs/`.)
 
-**On the Nextcloud server**, install the hook and edit its three variables
+**On the issuing machine**, install the hook and edit its three variables
 (`CERT_NAME`, `PI_HOST`, `KEY`):
 
 ```bash
-sudo cp deploy/certbot-deploy-hook.sh /etc/letsencrypt/renewal-hooks/deploy/thermostat.sh
-sudo chmod 755 /etc/letsencrypt/renewal-hooks/deploy/thermostat.sh
+sudo install -m 755 deploy/certbot-deploy-hook-remote.sh \
+     /etc/letsencrypt/renewal-hooks/deploy/thermostat.sh
 sudo RENEWED_LINEAGE=/etc/letsencrypt/live/YOUR-CERT-NAME \
      /etc/letsencrypt/renewal-hooks/deploy/thermostat.sh      # first copy, by hand
 ```
 
-Check on the Pi: `ls -l /opt/pi.thermostat/certs` shows `fullchain.pem` and
-`privkey.pem`, the key with mode `-rw-------`. Then `sudo systemctl restart thermostat`.
+If the issuing machine does not use certbot, run the same `rsync` command from
+whatever hook your ACME client provides.
 
-From now on every renewal copies the files and the server loads them within a
-minute, with no restart. `data/thermostat.log` records `TLS certificate reloaded`.
+### Option D: certificate files you already have
 
-> **Security note.** The certificate is shared with Nextcloud, so the Pi holds
-> the same private key. If the Pi were compromised, that key would be exposed
-> too. To separate them later, issue a certificate for only the thermostat
-> hostname (`certbot certonly --cert-name thermostat ...`) and point `CERT_NAME`
-> at it. Nothing in the app changes.
+Copy them into place and fix the ownership and permissions:
+
+```bash
+sudo install -o thermostat -g thermostat -m 644 fullchain.pem /opt/pi.thermostat/certs/
+sudo install -o thermostat -g thermostat -m 600 privkey.pem   /opt/pi.thermostat/certs/
+```
+
+`fullchain.pem` must contain the certificate **and** the intermediate certificates, in
+that order; a certificate alone makes some phones refuse the connection. To renew,
+replace the two files the same way; the server reloads them by itself.
+
+### Check it
+
+After the first copy, restart once (`sudo systemctl restart thermostat`), then:
+
+```bash
+ls -l /opt/pi.thermostat/certs        # privkey.pem must show -rw------- thermostat thermostat
+echo | openssl s_client -connect localhost:8443 -servername thermostat.example.com 2>/dev/null \
+  | openssl x509 -noout -subject -dates
+```
+
+The `notAfter` date is when it expires. After every later renewal
+`data/thermostat.log` records `TLS certificate reloaded`; a bad pair is logged as
+`new certificate rejected, keeping the old one`.
+
+> **Security note.** The private key lives on the Pi. Use a certificate for the
+> thermostat's host name alone (for example `certbot certonly --cert-name thermostat
+> -d thermostat.example.com`), not one shared with other services: a certificate that
+> covers several names shares one key between all of them, so a compromise of the Pi
+> would expose the key for every service on it. The app works the same either way.
 
 ## 8. Network
 
 1. **Router, port forward:** external TCP `8443` to the Pi's reserved address,
-   port `8443`. (Port 80 stays forwarded to the Nextcloud server for renewals.)
-2. **Hostname:** your DDNS hostname must resolve to your home IP. Confirm it is
-   kept up to date the same way the others are.
+   port `8443`. If you chose certificate Option A, also forward external TCP `80` to
+   the Pi's port `80`; that is how Let's Encrypt checks (and re-checks at each renewal).
+   Visitors only ever type the 8443 address.
+2. **Hostname:** your host name must resolve to your home's public IP address. If your
+   provider changes that address now and then, keep the name updated with your router's
+   dynamic-DNS setting or a small updater such as `ddclient` on the Pi. Test from
+   outside: `nslookup thermostat.example.com` on mobile data should show your current
+   public address (the one a "what is my IP" site shows from home).
+
+   **Check for CGNAT first.** If the router's WAN address differs from the address the
+   "what is my IP" site shows, your provider shares one public address between
+   customers and port forwarding cannot work. Ask the provider for a public (non-CGNAT)
+   address, or use a tunnel or VPN instead of exposing the port.
 3. **Opening it from inside your home:** many routers can't reach their own
    public address from the LAN ("hairpin NAT"). Add a local DNS override so the
    thermostat hostname resolves to the Pi's LAN address at home (a router setting,
@@ -310,6 +439,7 @@ minute, with no restart. `data/thermostat.log` records `TLS certificate reloaded
    sudo ufw default deny incoming && sudo ufw default allow outgoing
    sudo ufw allow from 192.168.1.0/24 to any port 22 proto tcp    # SSH from the LAN only
    sudo ufw allow 8443/tcp
+   sudo ufw allow 80/tcp                                           # certificate Option A only
    sudo ufw enable
    ```
 5. Turn on automatic security updates: `sudo apt install unattended-upgrades`
@@ -375,6 +505,9 @@ To log everyone out: delete `data/sessions.json` and restart the service.
 | Red banner "Control loop stopped" | Same cause. The dead-man switch shut the relays off. The banner clears when cron runs again. |
 | Red banner "Temperature sensor failing" | See the sensor rows. It clears itself once reads recover. |
 | Server won't start: `TLS file not found` | The certificate hasn't arrived yet (section 7). |
+| `certbot` fails with "Timeout during connect" or "Connection refused" | Let's Encrypt cannot reach port 80 on your name: check the router forward, the Pi firewall, that the name points at your current public IP, and that you are not behind CGNAT (section 8). |
+| A renewal never arrives | `sudo certbot renew --dry-run` shows why (usually port 80 or DNS credentials). Look for `TLS certificate reloaded` in the log; check `ls -l certs/` dates. |
+| The screen zooms when tapping + or − quickly | Fixed in the current version (the page now turns off double-tap zoom but still allows pinch zoom). If you still see it, reload the page; for a home-screen shortcut, close the app fully, or delete the shortcut and add it again, so the phone fetches the new files. |
 | Browser says "not private" | You opened the page by IP address or a name that isn't on the certificate. Use the hostname. |
 | `429 too many attempts` at login | Wait out the lockout (the message says how long). The log shows `login throttled`. |
 | Can reach it from mobile data but not at home | Add the local DNS override (section 8.3). |

@@ -59,6 +59,19 @@ class StaticServing(unittest.TestCase):
         self.assertNotIn("innerHTML", js)                        # all text via textContent
         self.assertNotIn("eval(", js)
 
+    def test_rapid_taps_cannot_trigger_double_tap_zoom(self):
+        css = re.sub(r"/\*.*?\*/", "", open(os.path.join(STATIC, "style.css")).read(), flags=re.S)
+        m = re.search(r"([^{}]*)\{\s*touch-action:\s*manipulation;?\s*\}", css)
+        self.assertIsNotNone(m, "touch-action: manipulation rule is missing")
+        selectors = [x.strip() for x in m.group(1).split(",")]
+        for needed in ("html", "body", "button"):
+            self.assertIn(needed, selectors)
+        self.assertRegex(css, r"user-select:\s*none")
+        # pinch-zoom must stay available (accessibility): the viewport tag must not lock it
+        html = open(os.path.join(STATIC, "index.html")).read()
+        self.assertNotRegex(html, r"user-scalable\s*=\s*(no|0)")
+        self.assertNotIn("maximum-scale", html)
+
     def test_login_box_asks_for_number_pad(self):
         html = open(os.path.join(STATIC, "index.html")).read()
         self.assertRegex(html, r'id="pin"[^>]*inputmode="numeric"')

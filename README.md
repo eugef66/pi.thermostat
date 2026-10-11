@@ -108,7 +108,7 @@ Regenerate artwork: `python3 tools/make_icons.py [--design 1|2|3]`,
 ```
 thermostat/   config, state, control, hardware, engine, auth, webapp, api, static, server, cli
 static/       the web app (index.html, style.css, app.js, manifest, icons)
-deploy/       systemd unit, crontab, certbot deploy hook, `th` helper
+deploy/       systemd unit, crontab, certbot deploy hooks (local and remote), `th` helper
 docs/         INSTALL.md, EMULATOR.md, REFERENCE.md, wiring diagram, GPIO pin map, icon options
 tests/        unit, API, server (real TLS), UI (runs app.js in Node)
 tools/        icon and diagram generators
