@@ -78,19 +78,20 @@ button:focus-visible, input:focus-visible, summary:focus-visible {
 .hum { color: var(--muted); font-size: 15px; }
 
 /* ---------- setpoint ---------- */
-.setpoint { display: flex; align-items: center; justify-content: center; gap: 28px; margin-bottom: 20px; }
+.setpoint { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 5vw, 28px); margin-bottom: 20px; }
 .setpoint.disabled { opacity: .35; pointer-events: none; }
 .target { text-align: center; min-width: 96px; }
 .label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .target .value { font-size: 40px; font-weight: 400; font-variant-numeric: tabular-nums; }
 .round {
-  width: 60px; height: 60px; border-radius: 50%;
+  /* big thumb targets; scales down a little on very narrow phones so the row still fits */
+  width: clamp(66px, 19.5vw, 76px); height: clamp(66px, 19.5vw, 76px); border-radius: 50%;
   border: 1px solid var(--line); background: var(--surface);
   display: grid; place-items: center; cursor: pointer;
   box-shadow: 0 2px 6px rgba(31, 41, 51, .06);
 }
 .round:active { transform: scale(.96); }
-.round svg { width: 26px; height: 26px; fill: none; stroke: var(--text); stroke-width: 2.2; stroke-linecap: round; }
+.round svg { width: 34px; height: 34px; fill: none; stroke: var(--text); stroke-width: 2.4; stroke-linecap: round; }
 
 /* ---------- modes ---------- */
 .modes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
