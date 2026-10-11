@@ -29,6 +29,16 @@ body {
 #app { max-width: 480px; margin: 0 auto; padding: 16px 20px 40px; }
 h1 { font-size: 20px; font-weight: 600; margin: 0; }
 button { font: inherit; color: inherit; }
+
+/* Rapid taps on + and - must count as taps, not as "double-tap to zoom".
+   `manipulation` keeps scrolling and pinch-zoom but turns off double-tap zoom
+   (and the old 300 ms tap delay). */
+html, body, button, input, label, summary { touch-action: manipulation; }
+/* Don't select text or open the iOS callout when tapping quickly or holding a control. */
+button, .dial, .setpoint, .modes, .check, summary, footer {
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+button { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, input:focus-visible, summary:focus-visible {
   outline: 3px solid #4c8dd6; outline-offset: 2px;
 }
