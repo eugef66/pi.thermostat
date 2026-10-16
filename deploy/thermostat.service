@@ -8,7 +8,6 @@ User=thermostat
 Group=thermostat
 SupplementaryGroups=gpio
 WorkingDirectory=/opt/pi.thermostat
-Environment=THERMOSTAT_CONFIG=/opt/pi.thermostat/config.toml
 ExecStart=/opt/pi.thermostat/.venv/bin/python -m thermostat serve
 Restart=on-failure
 RestartSec=5

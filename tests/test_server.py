@@ -208,7 +208,7 @@ class StartupTests(unittest.TestCase):
         from contextlib import redirect_stdout
         out = io.StringIO()
         with redirect_stdout(out):
-            self.assertEqual(cli.main(["-c", p, "check-config"]), 0)
+            self.assertEqual(cli.main(["check-config"], config_path=p), 0)
         self.assertIn("PIN: NOT SET", out.getvalue())
 
 

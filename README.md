@@ -64,7 +64,7 @@ body, 422 invalid value, 429 throttled (with `Retry-After`), 503 controller busy
 
 ## CLI
 
-`python -m thermostat [-c config.toml] [-v] <command>`:
+`python -m thermostat [-v] <command>` (it always reads `config.toml` from the project folder):
 `proc`, `get [--json]`, `set --mode M [--temp T] [--start ISO]`, `cancel-pending`,
 `init`, `serve`, `set-pin`, `check-config`, `test-sensor`, `test-relays`; and for the
 emulator only: `emu-temp`, `emu-pins`, `dev-loop`.
@@ -108,7 +108,7 @@ Regenerate artwork: `python3 tools/make_icons.py [--design 1|2|3]`,
 ```
 thermostat/   config, state, control, hardware, engine, auth, webapp, api, static, server, cli
 static/       the web app (index.html, style.css, app.js, manifest, icons)
-deploy/       systemd unit, crontab, certbot deploy hooks (local and remote), `th` helper
+deploy/       systemd unit, crontab, certbot deploy hooks (local and remote), private-CA script, `th` helper
 docs/         INSTALL.md, EMULATOR.md, REFERENCE.md, wiring diagram, GPIO pin map, icon options
 tests/        unit, API, server (real TLS), UI (runs app.js in Node)
 tools/        icon and diagram generators

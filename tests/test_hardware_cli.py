@@ -23,7 +23,7 @@ def write_cfg(d, **hw):
 def run(d, *argv):
     out, err = io.StringIO(), io.StringIO()
     with redirect_stdout(out), redirect_stderr(err):
-        rc = cli.main(["-c", os.path.join(d, "config.toml"), *argv])
+        rc = cli.main(list(argv), config_path=os.path.join(d, "config.toml"))
     return rc, out.getvalue(), err.getvalue()
 
 
@@ -148,12 +148,40 @@ class CliTests(unittest.TestCase):
         open(os.path.join(self.d, "config.toml"), "w").write("[hardware]\nbogus = 1\n")
         self.assertEqual(run(self.d, "get")[0], 3)
 
-    def test_module_entrypoint(self):
-        r = subprocess.run([sys.executable, "-m", "thermostat", "-c",
-                            os.path.join(self.d, "config.toml"), "get"],
-                           cwd=ROOT, capture_output=True, text=True)
+    def test_module_entrypoint_uses_the_project_config_from_any_folder(self):
+        # a copy of the package with its own config.toml beside it, run from an unrelated folder
+        import shutil
+        proj, elsewhere = tempfile.mkdtemp(), tempfile.mkdtemp()
+        shutil.copytree(os.path.join(ROOT, "thermostat"), os.path.join(proj, "thermostat"),
+                        ignore=shutil.ignore_patterns("__pycache__"))
+        write_cfg(proj)
+        os.makedirs(os.path.join(proj, "data"))
+        r = subprocess.run([sys.executable, "-m", "thermostat", "get"], cwd=elsewhere,
+                           capture_output=True, text=True, env=dict(os.environ, PYTHONPATH=proj))
         self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("Mode        : OFF", r.stdout)
+        self.assertTrue(os.path.exists(os.path.join(proj, "data", "state.json")))   # state next to that config
+        self.assertEqual(os.listdir(elsewhere), [])                                 # nothing leaked into cwd
 
+    def test_there_is_no_config_option(self):
+        r = subprocess.run([sys.executable, "-m", "thermostat", "-c", "x.toml", "get"],
+                           cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2)                      # refused as a usage error
+        self.assertIn("error:", r.stderr)
+        h = subprocess.run([sys.executable, "-m", "thermostat", "-h"], cwd=ROOT,
+                           capture_output=True, text=True).stdout
+        self.assertNotIn("--config", h)
+        self.assertIn("config.toml", h)                        # the help says which file is used
+
+    def test_default_config_is_in_the_project_folder(self):
+        self.assertEqual(cli.CONFIG_PATH, os.path.join(ROOT, "config.toml"))
+
+    def test_missing_config_explains_what_to_do(self):
+        os.remove(os.path.join(self.d, "config.toml"))
+        rc, _, err = run(self.d, "get")
+        self.assertEqual(rc, 3)
+        self.assertIn("config file not found", err)
+        self.assertIn("Copy config.example.toml to config.toml", err)
 
 class EmulatorHelperTests(unittest.TestCase):
     def setUp(self):

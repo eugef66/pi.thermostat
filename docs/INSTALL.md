@@ -268,6 +268,7 @@ name you type. Throughout this section the example name is `thermostat.example.c
 | You use a DNS provider that certbot can drive through an API, and would rather not open port 80 | **Option B**: DNS challenge |
 | Another machine you control already obtains certificates for this name | **Option C**: copy from that machine |
 | You already have certificate files (commercial, or from your own CA) | **Option D**: place the files |
+| Port 80 is blocked (some providers do), or you simply don't want a public certificate, and you are the only user | **Option E**: your own private certificate |
 
 > While experimenting with options A to C, add `--staging` to the certbot command.
 > Let's Encrypt limits repeated real issuance, and staging certificates are not trusted
@@ -291,7 +292,8 @@ sudo certbot certonly --standalone -d thermostat.example.com \
      --agree-tos -m you@example.com
 ```
 
-Nothing else on the Pi may be using port 80. certbot stores the certificate in
+Nothing else on the Pi may be using port 80 (and, normally, nothing is: you will not see
+anything listening on port 80 outside of this check). certbot stores the certificate in
 `/etc/letsencrypt/live/thermostat.example.com/`, readable only by root, so install the
 hook that copies it to the thermostat after every issue or renewal:
 
@@ -313,6 +315,59 @@ renewal with:
 systemctl list-timers | grep certbot
 sudo certbot renew --dry-run
 ```
+
+#### If certbot says "Timeout during connect"
+
+First, don't be alarmed that nothing listens on port 80 when you check with `ss -tlnp`:
+certbot opens it only for the few seconds of the check. The timeout means Let's
+Encrypt's request never reached the Pi. Find where it stops, working from the Pi outward:
+
+1. **Read what certbot tried.** The error names the address it contacted, for example
+   `Detail: 203.0.113.7: Fetching http://thermostat.example.com/.well-known/...:
+   Timeout during connect`. That address must be your home's public IP address (what
+   `curl -4 ifconfig.me` prints on the Pi). If it differs, your name points at an old
+   address (fix the dynamic-DNS update) or at a different place entirely.
+   If the name also has an IPv6 (`AAAA`) record, Let's Encrypt may try that instead:
+   remove the AAAA record unless IPv6 really reaches the Pi.
+2. **Test port 80 yourself, without certbot.** On the Pi, serve a harmless empty page:
+   ```bash
+   sudo ufw allow 80/tcp
+   mkdir -p /tmp/porttest && cd /tmp/porttest
+   sudo python3 -m http.server 80
+   ```
+   Then, **from outside your home** (a phone with Wi-Fi switched off), open
+   `http://thermostat.example.com/`. You should see "Directory listing for /". Press
+   Ctrl-C on the Pi when done. Testing from inside your home proves nothing: many
+   routers cannot reach their own public address.
+   * Page appears: the path works. Run certbot again (add `--staging` while testing).
+   * Page does not appear: continue below.
+3. **Is it the router?** The rule must be protocol **TCP**, external port **80**, to the
+   Pi's reserved address, port **80**. Also check that the router's own remote
+   administration is not using port 80, and that the rule is on the correct internet
+   (WAN) connection. If you have two routers in a row (an ISP modem plus your own
+   router), forward on **both**.
+4. **Does 8443 work from outside?** If `https://thermostat.example.com:8443` loads from
+   mobile data but port 80 does not, the router rule for 80 is wrong, or **your provider
+   blocks inbound port 80** (some residential providers do; ask them, or check their
+   terms).
+5. **CGNAT.** If the router's WAN address (in its status page) is not the address
+   `ifconfig.me` shows, or it starts with `100.64.` to `100.127.` or is a private range
+   (`10.`, `192.168.`, `172.16.` to `172.31.`), your provider shares one public address
+   between customers and no port forwarding works at all. Ask for a public address, or
+   use a tunnel or VPN.
+6. **The Pi firewall.** `sudo ufw status` must list `80/tcp ALLOW`.
+
+certbot's full log, with the exact URL and address it tried, is in
+`/var/log/letsencrypt/letsencrypt.log`. Let's Encrypt allows only a handful of failed
+attempts per name per hour, so fix one thing at a time and test with the steps above or
+`--staging` rather than retrying real issuance.
+
+**If port 80 cannot be made to work**, you do not need it: use **Option B** (DNS
+challenge, no open ports), or **Option D**. Some free dynamic-DNS services offer a
+TXT-record API that certbot-compatible tools can use; check your provider. If your
+provider blocks 80 but allows 443, some other ACME clients (for example `acme.sh` or
+`lego`) can validate over port 443 instead (the "TLS-ALPN-01" method); then you place
+the resulting files as in Option D.
 
 ### Option B: DNS challenge (no open ports)
 
@@ -394,6 +449,92 @@ sudo install -o thermostat -g thermostat -m 600 privkey.pem   /opt/pi.thermostat
 that order; a certificate alone makes some phones refuse the connection. To renew,
 replace the two files the same way; the server reloads them by itself.
 
+### Option E: your own private certificate
+
+This needs **no open ports, no certbot and no public service**. You become your own
+certificate authority (CA): you create the CA once, install its public certificate on
+each phone and computer you will use, and sign the thermostat's certificate with it.
+Those devices then trust the connection like any other HTTPS site, with no warnings,
+and the traffic is encrypted exactly as with Let's Encrypt. The cost is that every new
+device needs the CA installed once, and you renew by hand about every two years.
+
+(You could instead create a single self-signed certificate and click through the
+browser warning on every device. Don't: phones show the warning repeatedly, and a
+home-screen shortcut may refuse to open at all. A private CA avoids both.)
+
+**1. Create the CA and the certificate, on your laptop** (not on the Pi: the CA's
+secret key can create certificates your devices trust, so it must never sit on the
+thermostat). You need `openssl` (Linux, macOS, WSL, or Git Bash on Windows). Copy
+`deploy/make-private-cert.sh` from the project to the laptop, then run it with the
+name you type into the browser, plus any other names or addresses you will also use:
+
+```bash
+sh make-private-cert.sh thermostat.example.com thermostat.local 192.168.1.50
+```
+
+The browser checks the exact name, so list every way you will open the thermostat. It
+creates a folder `private-ca/` containing:
+
+| File | What to do with it |
+|---|---|
+| `fullchain.pem`, `privkey.pem` | Copy to the Pi (step 2). |
+| `ca.crt` | Install on your devices (step 3). Public; safe to send by email or AirDrop. |
+| `ca.key` | **Keep secret and off the Pi.** Store it with your backups. You need it to renew. |
+
+**2. Put the certificate on the Pi:**
+
+```bash
+scp private-ca/fullchain.pem private-ca/privkey.pem pi@thermostat.local:/tmp/
+ssh pi@thermostat.local
+sudo install -o thermostat -g thermostat -m 644 /tmp/fullchain.pem /opt/pi.thermostat/certs/
+sudo install -o thermostat -g thermostat -m 600 /tmp/privkey.pem   /opt/pi.thermostat/certs/
+sudo rm /tmp/fullchain.pem /tmp/privkey.pem
+sudo systemctl restart thermostat
+```
+
+**3. Install `ca.crt` on each device** (menu names vary a little between versions):
+
+* **iPhone / iPad:** send yourself `ca.crt` (AirDrop, email, or Files) and open it:
+  "Profile Downloaded". Then **Settings → General → VPN & Device Management → Thermostat
+  Private CA → Install**. Then, and this second step is easy to miss,
+  **Settings → General → About → Certificate Trust Settings** and switch **Thermostat
+  Private CA** on.
+* **Android:** **Settings → Security (or Security & privacy) → More security settings →
+  Encryption & credentials → Install a certificate → CA certificate**, then pick
+  `ca.crt`. Android will warn that the network may be monitored; that is the normal
+  message for any user-installed CA. Chrome then trusts the thermostat.
+* **Windows:** double-click `ca.crt` → **Install Certificate** → Current User → "Place all
+  certificates in the following store" → **Trusted Root Certification Authorities**.
+* **macOS:** double-click `ca.crt` (it opens Keychain Access), add it, then open it and
+  set **Trust → When using this certificate: Always Trust**.
+* **Firefox** keeps its own list: **Settings → Privacy & Security → View Certificates →
+  Authorities → Import**. Chrome, Edge and Safari use the system's list.
+
+**4. Check:** open `https://thermostat.example.com:8443`. You should see the padlock and
+no warning. If you still get one: you typed a name that is not in the certificate, the
+CA is not installed or (iPhone) not switched on under Certificate Trust Settings, or the
+device's clock is wrong.
+
+**5. Renew before it expires** (the script prints the date; the default is two years,
+and 825 days is the longest iPhones and Macs accept). Put a reminder in your calendar a
+month ahead. Because the thermostat tells browsers to insist on HTTPS, an **expired
+certificate cannot be clicked through**, so don't let it lapse. To renew, run the script
+again on the laptop **in the same place** (it reuses your CA, so your devices need
+nothing) and repeat step 2. The server loads the new files by itself within a minute;
+no restart is needed. If you lose `ca.key`, create a new CA and reinstall it on your
+devices.
+
+**If you tried Let's Encrypt first**, remove what is no longer needed, or a later renewal
+could replace your private certificate:
+
+```bash
+sudo rm -f /etc/letsencrypt/renewal-hooks/deploy/thermostat.sh   # the copy hook
+sudo apt remove certbot                                          # if you installed it
+sudo ufw delete allow 80/tcp                                     # if you opened it
+```
+
+and delete the port 80 forward in your router.
+
 ### Check it
 
 After the first copy, restart once (`sudo systemctl restart thermostat`), then:
@@ -417,7 +558,7 @@ The `notAfter` date is when it expires. After every later renewal
 ## 8. Network
 
 1. **Router, port forward:** external TCP `8443` to the Pi's reserved address,
-   port `8443`. If you chose certificate Option A, also forward external TCP `80` to
+   port `8443`. If you chose certificate Option A (and only then), also forward external TCP `80` to
    the Pi's port `80`; that is how Let's Encrypt checks (and re-checks at each renewal).
    Visitors only ever type the 8443 address.
 2. **Hostname:** your host name must resolve to your home's public IP address. If your
@@ -505,9 +646,11 @@ To log everyone out: delete `data/sessions.json` and restart the service.
 | Red banner "Control loop stopped" | Same cause. The dead-man switch shut the relays off. The banner clears when cron runs again. |
 | Red banner "Temperature sensor failing" | See the sensor rows. It clears itself once reads recover. |
 | Server won't start: `TLS file not found` | The certificate hasn't arrived yet (section 7). |
-| `certbot` fails with "Timeout during connect" or "Connection refused" | Let's Encrypt cannot reach port 80 on your name: check the router forward, the Pi firewall, that the name points at your current public IP, and that you are not behind CGNAT (section 8). |
+| `certbot` fails with "Timeout during connect" or "Connection refused" | Let's Encrypt cannot reach port 80 on your name. Follow "If certbot says Timeout during connect" in section 7: it tests the path step by step (name vs. public IP, router rule, provider blocking port 80, CGNAT, Pi firewall). |
 | A renewal never arrives | `sudo certbot renew --dry-run` shows why (usually port 80 or DNS credentials). Look for `TLS certificate reloaded` in the log; check `ls -l certs/` dates. |
 | The screen zooms when tapping + or − quickly | Fixed in the current version (the page now turns off double-tap zoom but still allows pinch zoom). If you still see it, reload the page; for a home-screen shortcut, close the app fully, or delete the shortcut and add it again, so the phone fetches the new files. |
+| iPhone still says the certificate is not trusted after installing the CA | The second step is missing: **Settings → General → About → Certificate Trust Settings** and switch the CA on. |
+| `ERR_CERT_COMMON_NAME_INVALID` (or "name does not match") with a private certificate | The address you typed is not one of the names in the certificate. Run `make-private-cert.sh` again listing every name and address you use, and copy the new files to the Pi. |
 | Browser says "not private" | You opened the page by IP address or a name that isn't on the certificate. Use the hostname. |
 | `429 too many attempts` at login | Wait out the lockout (the message says how long). The log shows `login throttled`. |
 | Can reach it from mobile data but not at home | Add the local DNS override (section 8.3). |

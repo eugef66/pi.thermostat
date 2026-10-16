@@ -23,8 +23,11 @@ is what you will see. Dates and times in examples are illustrative.
   no `cool_pin` removes `COOL` and `AUTO`, no `fan_pin` removes `FAN`. Mode names are
   accepted in any letter case; they are always returned in capitals.
 * **On a Pi** the examples use the `th` helper (`deploy/th`), which means
-  `sudo -u thermostat .venv/bin/python -m thermostat -c /opt/pi.thermostat/config.toml`.
+  `sudo -u thermostat /opt/pi.thermostat/.venv/bin/python -m thermostat`.
   Elsewhere, write `python -m thermostat` in its place.
+* **One config file.** Every command, cron and the server read the same
+  `config.toml`: the one in the project folder (`/opt/pi.thermostat/config.toml` on a Pi),
+  wherever you run the command from. There is no option to choose another.
 
 ### What each mode does
 
@@ -48,15 +51,15 @@ heat/cool changeover delay apply to everything except `OFF`; see
 ## 2. Command line
 
 ```
-python -m thermostat [-c CONFIG] [-v] <command> [options]
+python -m thermostat [-v] <command> [options]
 ```
 
 | Global option | Meaning |
 |---|---|
-| `-c`, `--config PATH` | Config file. Default: `$THERMOSTAT_CONFIG`, else `./config.toml`. |
+| `-h`, `--help` | Show help. `th -h` lists the commands; `th set -h` shows one command's options. |
 | `-v`, `--verbose` | Also print log lines to the terminal. |
 
-Global options go **before** the command: `th -v proc`, not `th proc -v`.
+`-v` goes **before** the command: `th -v proc`, not `th proc -v`.
 
 ### Exit codes
 

@@ -1,4 +1,4 @@
-"""Command line: `python -m thermostat <command>`.
+"""Command line: `python -m thermostat <command>` (settings: config.toml in the project folder).
 
   proc            one control pass (run from cron every minute)
   get             show current status
@@ -32,8 +32,10 @@ LABELS = {"heat1": "W1 heat stage 1", "heat2": "W2 heat stage 2",
           "cool": "Y cooling", "fan": "G fan"}
 
 
-def _config_path(arg):
-    return arg or os.environ.get("THERMOSTAT_CONFIG") or "config.toml"
+# Every command, cron and the server read this one file: config.toml in the project
+# folder (next to the thermostat/ package), whatever folder you run them from.
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_PATH = os.path.join(PROJECT_DIR, "config.toml")
 
 
 def _fmt_time(ts):
@@ -261,8 +263,8 @@ COMMANDS = {"proc": cmd_proc, "get": cmd_get, "set": cmd_set,
 
 def build_parser():
     p = argparse.ArgumentParser(prog="thermostat", description=__doc__,
+                                epilog=f"Settings are read from {CONFIG_PATH}",
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("-c", "--config", help="config.toml (or $THERMOSTAT_CONFIG)")
     p.add_argument("-v", "--verbose", action="store_true", help="also log to stderr")
     sub = p.add_subparsers(dest="command", required=True)
     for name in COMMANDS:
@@ -283,12 +285,16 @@ def build_parser():
     return p
 
 
-def main(argv=None) -> int:
+def main(argv=None, config_path=None) -> int:
+    """`config_path` exists for the test suite; the command line has no such option."""
     args = build_parser().parse_args(argv)
+    path = config_path or CONFIG_PATH
     try:
-        cfg = load(_config_path(args.config))
+        cfg = load(path)
     except ConfigError as e:
         print(f"config error: {e}", file=sys.stderr)
+        if not os.path.exists(path):
+            print("Copy config.example.toml to config.toml and edit it.", file=sys.stderr)
         return 3
     log = logsetup.setup(cfg.paths.log_file, verbose=args.verbose)
     store = StateStore(cfg.paths.state_file, cfg.paths.lock_file, cfg.control.default_target)
