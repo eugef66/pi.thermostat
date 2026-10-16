@@ -162,11 +162,6 @@ Edit `config.toml` with `sudo -u thermostat nano config.toml`:
 * `[control]`: set `timezone`. The other defaults are explained in section 9.
 * `[server]`: `port = 8443` (any port above 1024 works without extra privileges).
 
-**Coming from the old project?** Copy the old `db.json` to
-`data/state.json`. It is converted on first start (mode and target are kept; the
-old one-shot schedule is dropped). **Treat your old PIN as exposed**, because its
-hash was committed to the repository: set a new one below.
-
 Install the short `th` command, which runs the CLI as the service user:
 
 ```bash
