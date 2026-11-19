@@ -45,13 +45,15 @@ an extra layer, never the only one.
 4. Write the card, put it in the Pi, power on, wait two minutes.
 5. From your computer: `ssh pi@thermostat.local`
 
-Then update and install the system packages:
+Then update the system:
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y python3-venv python3-dev build-essential git rsync libgpiod2 ufw
 sudo reboot
 ```
+
+You do not need to install anything else by hand: the installer in section 4 adds the
+rest, including **git**, which a fresh Lite image does not have.
 
 Give the Pi a **fixed address**: in your router, reserve a DHCP lease for it
 (for example `192.168.1.50`). You will need that address later.
@@ -60,14 +62,14 @@ Give the Pi a **fixed address**: in your router, reserve a DHCP lease for it
 
 Power the Pi **off** (`sudo poweroff`, then unplug) before wiring.
 
-![Wiring diagram](wiring.png)
+![Wiring diagram](docs/wiring.png)
 
 And the Pi's 40-pin header with every pin this project uses highlighted. Use it to
 find the physical pins before you plug anything in:
 
-![Raspberry Pi 3B GPIO pin map](gpio-pinmap.png)
+![Raspberry Pi 3B GPIO pin map](docs/gpio-pinmap.png)
 
-(`wiring.svg` and `gpio-pinmap.svg` are the same diagrams as scalable files.)
+(`docs/wiring.svg` and `docs/gpio-pinmap.svg` are the same diagrams as scalable files.)
 
 ### 3.1 Pi to sensor and relay board
 
@@ -84,7 +86,7 @@ find the physical pins before you plug anything in:
 | 29 | GPIO 5 | Relay **IN3** (W2, heat stage 2) |
 | 31 | GPIO 6 | Relay **IN4** (G, fan) |
 
-Want to rehearse first? [EMULATOR.md](EMULATOR.md) runs everything on a laptop.
+Want to rehearse first? [docs/EMULATOR.md](docs/EMULATOR.md) runs everything on a laptop.
 
 Why these pins: GPIO 2-8 are pulled **high** by the Pi from the instant power is
 applied, and your relay board is active-low (low = relay on). So every relay is
@@ -134,39 +136,68 @@ Take a photo of the finished wiring before closing everything up.
 
 ## 4. Install the software
 
-Power the Pi on, then:
+Power the Pi on, log in over SSH, and run the installer. **One command:**
 
 ```bash
-sudo useradd --system --create-home --shell /bin/sh thermostat   # no password; see section 7
+curl -fsSL https://raw.githubusercontent.com/eugef66/pi.thermostat/HEAD/install.sh | sudo bash
+```
+
+(`HEAD` means the repository's default branch. To install a particular branch, or a copy
+of the project in another repository, put the settings before `bash`:
+`curl -fsSL <url-of-install.sh> | sudo REPO_URL=https://github.com/you/fork.git BRANCH=my-branch bash`.
+If `curl` is missing, `sudo apt install -y curl` first.)
+
+It takes a few minutes and does everything in this section for you:
+
+1. installs the system packages, **including git**
+2. creates the `thermostat` service user (no password) and adds it to the `gpio` group
+3. downloads the project into `/opt/pi.thermostat`
+4. builds the Python environment and installs the libraries, including the Pi GPIO and
+   DHT22 sensor libraries
+5. creates `data/`, `certs/` and a `config.toml` for you to edit
+6. installs the short `th` command used throughout this guide
+
+It is safe to run again. A second run **updates the code** and leaves your `config.toml`,
+`data/` and `certs/` untouched, so it is also how you update later. If anything fails, it
+says where; fix the problem and run the same command again. Other settings (the install
+folder, the service user) are listed by `./install.sh --help`.
+
+**Have the project as a zip or a clone instead of using git?** Put it on the Pi, unpack it,
+and run the installer from inside the folder; it installs that copy:
+
+```bash
+sudo apt install -y unzip
+unzip pi.thermostat-final.zip -d ~/pi.thermostat
+cd ~/pi.thermostat && sudo bash install.sh
+```
+
+**Prefer to do it by hand?** These are the same steps:
+
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-dev build-essential git rsync libgpiod2   # libgpiod3 on newer OS releases
+sudo useradd --system --create-home --shell /bin/sh thermostat
 sudo usermod -aG gpio thermostat
-sudo mkdir -p /opt/pi.thermostat
-sudo chown thermostat:thermostat /opt/pi.thermostat
-sudo -u thermostat git clone --branch <your-branch> \
-     <your-repo-url> /opt/pi.thermostat
+sudo mkdir -p /opt/pi.thermostat && sudo chown thermostat:thermostat /opt/pi.thermostat
+sudo -u thermostat git clone <your-repo-url> /opt/pi.thermostat
 cd /opt/pi.thermostat
 sudo -u thermostat python3 -m venv .venv
 sudo -u thermostat .venv/bin/pip install -r requirements.txt -r requirements-pi.txt
-sudo -u thermostat mkdir -p data certs
-sudo chmod 700 /opt/pi.thermostat/certs
+sudo -u thermostat mkdir -p data certs && sudo chmod 700 certs
 sudo -u thermostat cp config.example.toml config.toml
+sudo install -m 755 deploy/th /usr/local/bin/th
 ```
 
-(Push the project to your repository on a branch first, or, if you have it as a
-zip, unpack it into `/opt/pi.thermostat` and `chown -R thermostat:thermostat` it
-instead of cloning.)
+### Set your configuration
 
-Edit `config.toml` with `sudo -u thermostat nano config.toml`:
+Edit `config.toml` with `sudo -u thermostat nano /opt/pi.thermostat/config.toml`:
 
 * `[hardware]`: check the pins against section 3. Delete the `cool_pin`, `fan_pin`
   or `heat2_pin` line for equipment you don't have.
 * `[control]`: set `timezone`. The other defaults are explained in section 9.
 * `[server]`: `port = 8443` (any port above 1024 works without extra privileges).
 
-Install the short `th` command, which runs the CLI as the service user:
-
-```bash
-sudo install -m 755 /opt/pi.thermostat/deploy/th /usr/local/bin/th
-```
+Check it with `th check-config`, which reports any mistake in the file.
 
 ## 5. First checks (relays NOT yet connected to the furnace)
 
@@ -572,6 +603,7 @@ The `notAfter` date is when it expires. After every later renewal
    Pi-hole, or similar).
 4. **Pi firewall:**
    ```bash
+   sudo apt install -y ufw
    sudo ufw default deny incoming && sudo ufw default allow outgoing
    sudo ufw allow from 192.168.1.0/24 to any port 22 proto tcp    # SSH from the LAN only
    sudo ufw allow 8443/tcp
@@ -646,6 +678,9 @@ To log everyone out: delete `data/sessions.json` and restart the service.
 | The screen zooms when tapping + or − quickly | Fixed in the current version (the page now turns off double-tap zoom but still allows pinch zoom). If you still see it, reload the page; for a home-screen shortcut, close the app fully, or delete the shortcut and add it again, so the phone fetches the new files. |
 | iPhone still says the certificate is not trusted after installing the CA | The second step is missing: **Settings → General → About → Certificate Trust Settings** and switch the CA on. |
 | `ERR_CERT_COMMON_NAME_INVALID` (or "name does not match") with a private certificate | The address you typed is not one of the names in the certificate. Run `make-private-cert.sh` again listing every name and address you use, and copy the new files to the Pi. |
+| The installer warns that the GPIO/sensor libraries did not install | Everything else is installed. Read the pip error printed just above the warning (no internet, or a library that does not yet support your OS and Python version are the usual causes), then retry only that step: `sudo -u thermostat /opt/pi.thermostat/.venv/bin/pip install -r /opt/pi.thermostat/requirements-pi.txt`. |
+| The installer says the folder "is not a git checkout" | `/opt/pi.thermostat` already holds files from a manual copy. Either move it aside (`sudo mv /opt/pi.thermostat /opt/pi.thermostat.old`), run the installer, and copy your `config.toml`, `data/` and `certs/` back; or unpack the project anywhere and run `sudo bash install.sh` from inside it, which updates the existing folder in place. |
+| The installer finishes but warns about your settings | The code is installed; `config.toml` has a mistake (the warning quotes it). Edit the file, then `th check-config`. |
 | Browser says "not private" | You opened the page by IP address or a name that isn't on the certificate. Use the hostname. |
 | `429 too many attempts` at login | Wait out the lockout (the message says how long). The log shows `login throttled`. |
 | Can reach it from mobile data but not at home | Add the local DNS override (section 8.3). |
